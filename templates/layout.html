@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My App{% endblock %}</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="w-dvw h-dvh bg-gray-200 grid grid-cols-7">
+        <!-- Sidebar -->
+        {% include 'sidebar.html' %}
+        
+        <!-- konten -->
+        <div class="col-span-6 bg-gray-100 p-4">
+            {% block content %}{% endblock %}
+        </div>
+        
+    </div>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script> 
+    {% block script %}{% endblock %}
+</body>
+</html>

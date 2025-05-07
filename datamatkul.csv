@@ -1,0 +1,31 @@
+kode_matakuliah,kurikulum,semester,dosen,matakuliah,status,sks,kelas
+1,2022,semester 3,Ardian,Sistem Cerdas,kelas,2,A
+2,2022,semester 3,Ardian,Praktikum Sistem Cerdas,lab,3,A
+3,2022,semester 3,Agil,Mobile,kelas,2,A
+4,2022,semester 3,Agil,Praktik Mobile,lab,3,A
+5,2022,semester 3,Fajar,Jaringan Komputer,kelas,2,A
+6,2022,semester 3,Fajar,Praktikum Jaringan Komputer,lab,3,A
+7,2022,semester 3,Eko,PKN,kelas,2,A
+8,2022,semester 3,Dhani,BIG,kelas,2,A
+9,2022,semester 3,Rama,Administrasi Jaringan,kelas,2,A
+10,2022,semester 3,Rama,Praktikum Administrasi Jaringan,lab,3,A
+11,2022,semester 3,Ardian,Sistem Cerdas,kelas,2,B
+12,2022,semester 3,Ardian,Praktikum Sistem Cerdas,lab,3,B
+13,2022,semester 3,Agil,Mobile,kelas,2,B
+14,2022,semester 3,Agil,Pemrograman Mobile,lab,3,B
+15,2022,Semester 1,Fajar,Jaringan Komputer,kelas,2,B
+16,2022,semester 3,Fajar,Praktikum Jaringan Komputer,lab,3,B
+17,2022,semester 3,Eko,PKN,kelas,2,B
+18,2022,semester 3,Dhani,BIG,kelas,2,B
+19,2022,semester 3,Rama,Administrasi Jaringan,kelas,2,B
+20,2022,semester 3,Rama,Praktikum Administrasi Jaringan,lab,3,B
+21,2022,semester 3,Very,Sistem Cerdas,kelas,2,C
+22,2022,semester 3,Very,Praktikum Sistem Cerdas,lab,3,C
+23,2022,semester 3,Agil,Mobile,kelas,2,C
+24,2022,semester 3,Agil,Praktikum Mobile,lab,3,C
+25,2022,semester 3,Kusno,Jaringan Komputer,kelas,2,C
+36,2022,semester 3,Kusno,Praktikum Jaringan Komputer,lab,3,C
+37,2022,semester 3,Eko,PKN,kelas,2,C
+38,2022,semester 3,Dhani,BIG,kelas,2,C
+39,2022,semester 3,Rama,Administrasi Jaringan,kelas,2,C
+40,2022,semester 3,Rama,Praktikum Administrasi Jaringan,lab,3,C

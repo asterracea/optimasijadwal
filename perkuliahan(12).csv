@@ -1,0 +1,11 @@
+id_kurikulum,nama_kurikulum,id_semester,nama_semester,kode_dosen,nama_dosen,id_kelasrombel,nama_kelas,kode_matakuliah,nama_matakuliah,sks,status
+3,Kurikulum Merdeka,3,Semester 3,32,Agus,2,3B,JK,Jaringan Komputer,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,25,ivana,2,3B,AD,Analisis Desain,3,Lab
+3,Kurikulum Merdeka,3,Semester 3,27,Amira,2,3B,SC,Sistem Cerdas,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,31,Diana,2,3B,DB,Basis Data,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,33,Andrean,2,3B,PIOT,Praktikum Internet of Things,3,Lab
+3,Kurikulum Merdeka,3,Semester 3,32,Agus,1  ,3A,JK,Jaringan Komputer,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,25,ivana,1,3A,AD,Analisis Desain,3,Lab
+3,Kurikulum Merdeka,3,Semester 3,27,Amira,1,3A,SC,Sistem Cerdas,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,31,Diana,1,3A,DB,Basis Data,2,Kelas
+3,Kurikulum Merdeka,3,Semester 3,33,Andrean,1,3A,PIOT,Praktikum Internet of Things,3,Lab

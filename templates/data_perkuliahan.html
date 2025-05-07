@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+{% block title %} data perkuliahan {% endblock %}
+{% block content %}
+    <div class="bg-white p-6 rounded-lg shadow">
+        <div class="overflow-x-auto">
+            <div class="max-h-[500px] overflow-y-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        {% set thead = [
+                            {'name':'No'},
+                            {'name': 'Kelas'},
+                            {'name': 'Matakuliah'},
+                            {'name': 'Dosen'},
+                            {'name': 'Status'},
+                        ] %}
+                        <tr>
+                            {% for item in thead%}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{item.name}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    {% if perkuliahans|length > 0 %}
+                        {% for perkuliahan in perkuliahans %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ loop.index }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ perkuliahan.id_kelasrombel }}</div>
+                                        </div>
+                                    </div>                                    
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ perkuliahan.kode_matakuliah }}</div>
+                                        </div>
+                                    </div>                                    
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ perkuliahan.kode_dosen }}</div>
+                                        </div>
+                                    </div>                                    
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ perkuliahan.nama_kelas }}</div>
+                                        </div>
+                                    </div>                                    
+                                </td>
+    
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-red-500">
+                            Data tidak tersedia!
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+        
