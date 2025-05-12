@@ -1,9 +1,11 @@
-from flask import Flask, render_template,request,jsonify
+from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response
 from routes.api import apiconn  # Import Blueprint
 from model.conn import get_db_auth
 import pandas as pd
 from insertDB import simpanData
-# from optimasi
+from sqlalchemy import create_engine
+from algoritma.optimasiSA import PenjadwalanSA
+
 
 app = Flask(__name__)
 
@@ -24,46 +26,47 @@ def index():
     conn.close()
     return render_template("dashboard.html", generates=id_generates, active_page='dashboard')
 
+@app.route('/generate-jadwal', methods=['GET','POST'])
+def generate_jadwal():
+    if request.method == 'POST':
+        id_generate = request.form.get('id_generate')
+        alpha = float(request.form.get('alpha'))
+        suhuawal = float(request.form.get('suhuawal'))
+        maxt = int(request.form.get('maxt'))
+
+        # Jalankan Simulated Annealing
+        sa = PenjadwalanSA(
+                initial_temperature=suhuawal,
+                cooling_rate=alpha,
+                max_iterations=maxt,
+                id_generate=id_generate
+            )
+        
+        best_solution, best_score = sa.anneal()
+        df_jadwal = sa.df_jadwaloptimasi(best_solution)
+        jadwal_list = df_jadwal.to_dict(orient='records')
+        sa.simpan_optimasi(df_jadwal)
+
+        
+        # flash('Jadwal berhasil digenerate!', 'success')
+        return render_template('dashboard.html', data=jadwal_list)
+    return redirect(url_for('index'))
+
 @app.route('/receive-json', methods=['POST'])
 def receive_json():
     try: 
         data = request.get_json()
-        # df_setjadwal = pd.DataFrame(data['setJadwal'])
-        # df_setruang = pd.DataFrame(data['setRuang'])
-        # df_setwaktu = pd.DataFrame(data['setWaktu'])
-        # simpanData(df_setjadwal, df_setruang, df_setwaktu)
-        print("Received JSON:", data)
-        return jsonify({"status": "successss", "received": data}), 200
+        simpanData(data)
+        return jsonify({"status": "successss"}), 200
     except Exception as e:
         print("Error parsing JSON:", e)
         return jsonify({"status": "failed", "error": str(e)}), 400
-    
-
     
 @app.route('/callback', methods=['POST'])
 def optimasi_callback():
     data = request.get_json()
     return jsonify({"status": "received", "data": data})
     
-@app.route('/generate-jadwal', methods=['POST'])
-def generate_jadwal():
-    id_generate = request.form.get('id_generate')
-    alpha = float(request.form.get('alpha'))
-    suhuawal = float(request.form.get('suhuawal'))
-    maxt = int(request.form.get('maxt'))
-
-    # Jalankan Simulated Annealing
-    sa = PenjadwalanSA(id_generate=id_generate, alpha=alpha, suhu_awal=suhuawal, max_iterasi=maxt)
-    best_solution, best_score = sa.anneal()
-    df_jadwal = sa.df_jadwaloptimasi(best_solution)
-
-    # Simpan hasil ke database
-    engine = create_engine('mysql+pymysql://root:@localhost/db_optimasi1')
-    df_jadwal.to_sql('tb_hasil', con=engine, if_exists='append', index=False)
-
-    flash('Jadwal berhasil digenerate!', 'success')
-    return redirect(url_for('halaman_generate'))  # ganti dengan nama route tujuan
-
 
 @app.route("/data/dosen")
 def data_dosen():

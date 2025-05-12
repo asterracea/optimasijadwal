@@ -2,21 +2,8 @@
 {% block title %}Generate Jadwal{% endblock %}
 {% block content %}
     <div class="bg-white p-6 rounded-lg shadow">
-        <form action="{{ url_for('generate_jadwal') }}">
+        <form action="{{ url_for('generate_jadwal') }}" method="POST">
             <div class="flex gap-6 item-start">
-                <!-- <div class="w-1/2">
-                    <label class="flex h-full  appearance-none justify-center rounded-md border border-dashed border-gray-400 bg-white px-3 py-6 text-sm transition hover:border-black focus:border-solid focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:opacity-75"
-                        tabindex="0">
-                        <input id="file-upload" accept=".xlsx, .xls" type="file" class="sr-only" onchange="updateFileName()"/>
-                        <span id="file-name" class="flex items-center space-x-2">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span class="text-sm font-bold text-gray-600">
-                                Unggah Berkas
-                            </span>
-                        </span>
-                    </label>
-                </div> -->
-
                 <div class="w-1/2">
                     <div class="flex items-center mb-5">
                         <label for="id_generate" class="w-30 block mb-1 font-bold text-gray-600 text-sm">Id Generate</label>
@@ -67,6 +54,35 @@
 
             </div>
         </form>
+
+        {% if data %}
+        <h2 class="mt-6 mb-2 font-bold text-lg">Hasil Jadwal:</h2>
+        <table class="table-auto border-collapse border border-gray-300 w-full">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-4 py-2">Hari</th>
+                    <th class="border px-4 py-2">Waktu</th>
+                    <th class="border px-4 py-2">Kelas</th>
+                    <th class="border px-4 py-2">Mata Kuliah</th>
+                    <th class="border px-4 py-2">Dosen</th>
+                    <th class="border px-4 py-2">Ruang</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td class="border px-4 py-2">{{ row.hari }}</td>
+                    <td class="border px-4 py-2">{{ row.waktu_mulai }} - {{ row.waktu_selesai }}</td>
+                    <td class="border px-4 py-2">{{ row.kelas }}</td>
+                    <td class="border px-4 py-2">{{ row.mata_kuliah }}</td>
+                    <td class="border px-4 py-2">{{ row.nama_dosen }}</td>
+                    <td class="border px-4 py-2">{{ row.ruang }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
     </div>
 {% endblock %}
 <!-- {% block script %}  
