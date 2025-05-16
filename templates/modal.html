@@ -1,0 +1,42 @@
+<div id="flashModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <button onclick="closeFlashModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
+    </div>
+    <div class="p-4 space-y-2">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="p-3 rounded-lg text-sm font-medium
+              {% if category == 'success' %}bg-green-100 text-green-800
+              {% elif category == 'warning' %}bg-yellow-100 text-yellow-800
+              {% elif category == 'danger' or category == 'error' %}bg-red-100 text-red-800
+              {% else %}bg-gray-100 text-gray-800{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <!-- <div class="px-6 py-3 border-t border-gray-200 text-right">
+      <button onclick="closeFlashModal()" class="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded">Tutup</button>
+    </div> -->
+  </div>
+</div>
+
+<script>
+  function closeFlashModal() {
+    document.getElementById('flashModal').classList.add('hidden');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('flashModal');
+    const hasContent = modal.querySelectorAll('.p-3').length > 0;
+    if (hasContent) {
+      modal.classList.remove('hidden');
+
+      // Optional: Auto close after 5 seconds
+      setTimeout(closeFlashModal, 5000);
+    }
+  });
+</script>

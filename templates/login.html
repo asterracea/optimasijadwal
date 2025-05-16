@@ -1,33 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Jadwal</title>
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 </head>
-<body>
+<body class="min-h-screen bg-indigo-900 text-white font-sans">
+
+  <div class="flex min-h-screen">
+    <div class="hidden md:block md:w-3/5"></div>
+    <div class="w-full md:w-2/5 bg-white text-black p-10 flex flex-col items-center justify-center md:rounded-l-3xl">
+      <div class="w-4/5 max-w-md">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Log in</h2>
+        <form class="space-y-5" method="POST" action="{{ url_for('login') }}">
+          <div class="relative">
+            <span class="absolute inset-y-0 left-4 flex items-center text-gray-500">
+              <i class="fas fa-envelope"></i>
+            </span>
+            <input type="text" placeholder="Email" name="email" required
+              class="w-full pl-10 pr-4 py-2 bg-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
+          </div>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-4 flex items-center text-gray-500">
+              <i class="fas fa-lock"></i>
+            </span>
+            <input type="password" placeholder="Password" name="password" required
+              class="w-full pl-10 pr-4 py-2 bg-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
+          </div>
+          <button type="submit"
+            class="w-full bg-black text-white py-2 rounded-full hover:bg-gray-900 transition">Login</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+  {% include "modal.html" %}
+
+</body>
+
+</html>
+<!-- <body>
   <div class="flex h-screen bg-white">
     <div class="w-full max-w-xs m-auto bg-indigo-100 rounded p-5">   
-            
-          <form>
-            <div>
-              <label class="block mb-2 text-indigo-500" for="username">Email</label>
-              <input class="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-gray-300" type="text" name="username">
-            </div>
-            <div>
-              <label class="block mb-2 text-indigo-500" for="password">Password</label>
-              <input class="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-gray-300" type="password" name="password">
-            </div>
-            <div>          
-              <input class="w-full bg-indigo-700 hover:bg-pink-700 text-white font-bold py-2 px-4 mb-6 rounded" type="submit">
-            </div>       
-          </form>  
-          <footer>
-            <a class="text-indigo-700 hover:text-pink-700 text-sm float-left" href="#">Forgot Password?</a>
-            <a class="text-indigo-700 hover:text-pink-700 text-sm float-right" href="#">Create Account</a>
-          </footer>   
+      <form method="POST">
+        <div>
+          <label for="email" class="block mb-2 text-indigo-500">Email</label>
+          <input id="email" name="email" type="text" 
+                 class="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-gray-300">
         </div>
+        <div>
+          <label for="password" class="block mb-2 text-indigo-500">Password</label>
+          <input id="password" name="password" type="password"
+                 class="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-gray-300">
+        </div>
+        <div>
+          <button type="submit" 
+                  class="w-full bg-indigo-700 hover:bg-pink-700 text-white font-bold py-2 px-4 mb-6 rounded">
+            Submit
+          </button>
+        </div>       
+      </form>  
     </div>
-</body>
+  </div>
+
+  {% include "modal.html" %}
+</body> 
+</html>
+
+
+

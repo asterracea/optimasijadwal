@@ -47,9 +47,16 @@
     </div>
     
     <div class="px-1">
-        <a class="flex items-center justify-center lg:justify-start rounded-md h-12 px-4 font-semibold text-red-500 hover:text-red-600 cursor-pointer" href="/logout">
+        <a
+           class="flex items-center justify-center lg:justify-start rounded-md h-12 px-4 font-semibold text-red-500 hover:text-red-600 cursor-pointer" id="btn-logout" href="/logout">
             <i class="fas fa-sign-out-alt mr-2"></i>
             <span class="hidden lg:block">Logout</span>
         </a>
     </div>
+    {% include 'LogoutModal.html' %}
 </div>
+{% block script %}
+<script src="{{ url_for('static', filename='js/logoutModal.js') }}"></script> 
+{% endblock %}
+
+    

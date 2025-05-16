@@ -6,15 +6,16 @@ def sendApi():
     db = 'mysql+pymysql://root:@localhost/db_optimasi1'
     engine = create_engine(db)
 
-    df_jadwal = pd.read_sql("SELECT h.hari, h.waktu_mulai, h.waktu_selesai,h.kelas, h.mata_kuliah, h.nama_dosen, h.ruang, p.temp_perkuliahan FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan", engine) #ubah berdasarkan id generate lalu kirim hasil
+    df_jadwal = pd.read_sql("SELECT h.hari, h.waktu_mulai, h.waktu_selesai,h.kelas, h.mata_kuliah, h.nama_dosen, h.ruang, h.semester, p.temp_perkuliahan FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan", engine) #ubah berdasarkan id generate lalu kirim hasil
 
     payload = {
         "setjadwal": df_jadwal.to_dict(orient="records"),
     }
+    print(payload)
 
     # json_payload = json.dumps(payload, ensure_ascii=False)
     
-    uri = 'http://192.168.21.173:8081/optimasi/callback'
+    uri = 'http://10.252.1.114:8081/optimasi/callback'
 
     headers = {
         'Content-Type': 'application/json',
@@ -25,6 +26,7 @@ def sendApi():
         response = requests.post(uri, json=payload, headers=headers)
         print("Status code:", response.status_code)
         print("Content-Type:", response.headers.get('Content-Type'))
+        print("payload")
         
         try:
             data = response.json()
