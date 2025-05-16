@@ -15,12 +15,15 @@ bcrypt = Bcrypt(app)
 
 
 @app.route("/",methods=["GET", "POST"])
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET","POST"])
 def login():
+    if 'id_user' in session:
+        return redirect(url_for('index'))
+    
     if request.method == 'POST':
         email = request.form['email'].strip()
         password_input = request.form['password'].strip()
-        print(f"[DEBUG] Email: {email}, Password: {password_input}")
+        # print(f"[DEBUG] Email: {email}, Password: {password_input}")
 
         with db_url.connect() as connection:
             query = text("SELECT id_user, email, password, nama, role, status FROM tb_user WHERE email = :email")
@@ -29,11 +32,11 @@ def login():
             if result:
                 id_user, email, password_hash, nama,role, status = result
                 if status != 'aktif':
-                    print(f"[DEBUG] User found: {email}, status: {status}")
+                    # print(f"[DEBUG] User found: {email}, status: {status}")
                     flash("Akun Anda tidak aktif. Silakan hubungi admin.", "warning")
                     return redirect(url_for('login'))
                 if bcrypt.check_password_hash(password_hash, password_input):
-                    print("[DEBUG] Password cocok.")
+                    # print("[DEBUG] Password cocok.")
                     session['id_user'] = id_user
                     session['email'] = email
                     session['nama'] = nama
@@ -41,7 +44,7 @@ def login():
                     flash("Login berhasil!", "success")
                     return redirect(url_for('index'))
                 else:
-                    print("[DEBUG] Password salah.")
+                    # print("[DEBUG] Password salah.")
                     flash("Password salah.", "danger")
             else:
                 flash("Username tidak ditemukan.", "danger")
@@ -59,6 +62,9 @@ def index():
 
 @app.route('/generate-jadwal', methods=['GET','POST'])
 def generate_jadwal():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     if request.method == 'POST':
         id_generate = request.form.get('id_generate')
         alpha = float(request.form.get('alpha'))
@@ -85,6 +91,9 @@ def generate_jadwal():
 
 @app.route('/receive-json', methods=['POST'])
 def receive_json():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     try: 
         data = request.get_json()
         simpanData(data)
@@ -101,6 +110,9 @@ def optimasi_callback():
 
 @app.route("/data/dosen")
 def data_dosen():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_dosen"))
         dosen_data = result.mappings().all()
@@ -109,36 +121,54 @@ def data_dosen():
     
 @app.route("/data/matakuliah")
 def data_matakuliah():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_matakuliah"))
         matkul_data = result.mappings().all()
     return render_template("data_matakuliah.html", matkuls=matkul_data, active_page='data_matakuliah')
 @app.route("/data/perkuliahan")
 def data_perkuliahan():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_perkuliahan"))
         perkuliahan_data = result.mappings().all()
     return render_template("data_perkuliahan.html",perkuliahans=perkuliahan_data, active_page='data_perkuliahan')
 @app.route("/data/generate")
 def data_generate():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_generate"))
         generate_data = result.mappings().all()
     return render_template("data_generate.html",generates=generate_data, active_page='data_generate')
 @app.route("/data/ruang")
 def data_ruang():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_ruang"))
         ruang_data = result.mappings().all()
     return render_template("data_ruang.html",ruangs=ruang_data, active_page='data_ruang')
 @app.route("/data/rombel")
 def data_rombel():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_rombel"))
         rombel_data = result.mappings().all()
     return render_template("data_rombel.html",rombels=rombel_data, active_page='data_rombel')
 @app.route("/jadwal")
 def data_hasil():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_hasil"))
         jadwal_data = result.mappings().all()
@@ -147,6 +177,9 @@ def data_hasil():
 
 @app.route("/logout")
 def logout():
+    if 'id_user' not in session:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for("login"))
     session.clear()
 
     flash("Anda telah logout.", "info")
