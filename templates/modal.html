@@ -1,29 +1,42 @@
 <div id="flashModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-      <button onclick="closeFlashModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
-    </div>
-    <div class="p-4 space-y-2">
+    
+    <div class="p-6 text-center space-y-4">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="p-3 rounded-lg text-sm font-medium
-              {% if category == 'success' %}bg-green-100 text-green-800
-              {% elif category == 'warning' %}bg-yellow-100 text-yellow-800
-              {% elif category == 'danger' or category == 'error' %}bg-red-100 text-red-800
-              {% else %}bg-gray-100 text-gray-800{% endif %}">
-              {{ message }}
+            <!-- Icon -->
+            <div class="flex justify-center">
+              <div class="w-16 h-16 rounded-full flex items-center justify-center
+                {% if category == 'success' %} bg-green-100 text-green-600
+                {% elif category == 'warning' %} bg-yellow-100 text-yellow-400
+                {% elif category == 'danger' or category == 'error' %} border border-4 border-rounded border-red-600 text-red-600
+                {% else %} bg-blue-100 text-gray-600 {% endif %}">
+                <i class="text-3xl
+                  {% if category == 'success' %} fa-solid fa-check
+                  {% elif category == 'warning' %} fa-solid fa-triangle-exclamation 
+                  {% elif category == 'danger' or category == 'error' %} fa-solid  fa-exclamation 
+                  {% else %} fa-solid fa-bell {% endif %}"></i>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800" id="modal-title">{{ message }}</h3>
             </div>
           {% endfor %}
         {% endif %}
       {% endwith %}
     </div>
-    <!-- <div class="px-6 py-3 border-t border-gray-200 text-right">
-      <button onclick="closeFlashModal()" class="bg-gray-100 hover:bg-gray-200 text-sm px-3 py-1 rounded">Tutup</button>
-    </div> -->
+
+    <!-- Footer Button -->
+    <div class="px-6 py-3 text-center">
+      <button onclick="closeFlashModal()" class="bg-[#0074B7] text-white hover:bg-blue-700 text-sm px-4 py-2 rounded">Tutup</button>
+    </div>
   </div>
 </div>
 
+<!-- JavaScript -->
 <script>
   function closeFlashModal() {
     document.getElementById('flashModal').classList.add('hidden');
@@ -31,12 +44,10 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('flashModal');
-    const hasContent = modal.querySelectorAll('.p-3').length > 0;
-    if (hasContent) {
+    const messages = modal.querySelectorAll('#modal-title');
+    if (messages.length > 0) {
       modal.classList.remove('hidden');
-
-      // Optional: Auto close after 5 seconds
-      setTimeout(closeFlashModal, 5000);
+      // setTimeout(closeFlashModal, 5000); // Auto-close after 5s
     }
   });
 </script>

@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response,session,logging
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from config import db_url  # Import Blueprint
+from config import db_url
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import pandas as pd
 from insertDB import simpanData
 from sqlalchemy import create_engine, text
@@ -208,7 +207,7 @@ def data_hasil():
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_hasil"))
         jadwal_data = result.mappings().all()
-    return render_template("data_hasiljadwal.html",jadwals=jadwal_data, active_page='hasil_jadwal')
+    return render_template("data_hasiljadwal.html",jadwals=jadwal_data, active_page='hasiljadwal')
 
 
 @app.route("/logout")

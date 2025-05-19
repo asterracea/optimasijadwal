@@ -18,6 +18,7 @@ def sendApi():
     uri = 'http://10.252.1.114:8081/optimasi/callback'
 
     headers = {
+        'Authorization': f"Bearer {token}",
         'Content-Type': 'application/json',
     }
 

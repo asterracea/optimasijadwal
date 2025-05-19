@@ -8,10 +8,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </head>
-<body class="min-h-screen bg-indigo-900 text-white font-sans">
+<body class="min-h-screen bg-[#BFD7ED] text-white font-sans relative overflow-hidden">
+  <!-- Animated colorful background blobs -->
+  <div class="absolute inset-0 z-0 overflow-hidden">
+    <div class="absolute md:top-50 left-24 lg:left-12 w-96 h-96 md:w-48 md:h-48 bg-orange-500 rounded-full md:mix-blend-multiply mix-blend-hue filter blur-xl opacity-70 animate-blob"></div>
+    <div class="absolute -top-24 md:top-0 md:-right-4 -right-10 w-72 h-72 md:w-72 md:h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute md:hidden top-60 md:top-0 left-10 w-24 h-24 md:w-72 md:h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute md:hidden bottom-60 md:top-0 right-10 w-24 h-24 md:w-72 md:h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute -bottom-8 md:-bottom-32 -left-32 lg:left-96 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+  </div>
 
-  <div class="flex min-h-screen">
-    <div class="hidden md:block md:w-3/5"></div>
+  <!-- Login container -->
+  <div class="relative z-10 flex min-h-screen">
+    <!-- Left text section (hidden on mobile) -->
+    <div class="hidden md:flex md:w-3/5 items-end pb-20 ">
+      <!-- <div class="text-5xl font-bold tracking-wide text-black py-5">SELAMAT DATANG!</div> -->
+      <!-- <img  class="w-full h-auto object-contain px-12" src="{{ url_for('static', filename='images/login.png') }}" alt="log pic"> -->
+    </div>
+
+    <!-- Login form -->
     <div class="w-full md:w-2/5 bg-white text-black p-10 flex flex-col items-center justify-center md:rounded-l-3xl">
       <div class="w-4/5 max-w-md">
         <h2 class="text-2xl font-semibold mb-6 text-center">Log in</h2>
@@ -21,22 +36,24 @@
               <i class="fas fa-envelope"></i>
             </span>
             <input type="text" placeholder="Email" name="email" required
-              class="w-full pl-10 pr-4 py-2 bg-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
+              class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
           <div class="relative">
             <span class="absolute inset-y-0 left-4 flex items-center text-gray-500">
               <i class="fas fa-lock"></i>
             </span>
             <input type="password" placeholder="Password" name="password" required
-              class="w-full pl-10 pr-4 py-2 bg-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
+              class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
           <button type="submit"
-            class="w-full bg-black text-white py-2 rounded-full hover:bg-gray-900 transition">Login</button>
+            class="w-full bg-[#0074B7] text-white py-2 rounded-full hover:bg-gray-900 transition">Login</button>
+          <p class="text-center text-gray-500">Or</p>
+          <button type="button" class="w-full bg-gray-200 text-black py-2 rounded-full hover:bg-gray-300 transition">Sign up</button>
         </form>
       </div>
     </div>
-
   </div>
   {% include "modal.html" %}
 </body>
+
 </html>
