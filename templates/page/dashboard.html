@@ -25,7 +25,7 @@
                             type="text" 
                             id="alpha" 
                             name="alpha"
-                            placeholder="masukkan cooling rate" >
+                            placeholder="masukkan cooling rate" required >
                     </div>
                                 
                     <div class="flex items-center mb-5">
@@ -34,7 +34,7 @@
                             type="text" 
                             id="suhuawal" 
                             name="suhuawal" 
-                            placeholder="masukkan suhu awal" >
+                            placeholder="masukkan suhu awal" required>
                     </div>
                     
                     <div class="flex items-center mb-5">
@@ -43,7 +43,7 @@
                             type="text" 
                             id="maxt" 
                             name="maxt" 
-                            placeholder="masukkan maximumiterasi">
+                            placeholder="masukkan maximumiterasi" required>
                     </div>
                     
                 </div>
@@ -82,8 +82,8 @@
             </tbody>
         </table>
     {% endif %}
-        {% include "modal.html" %}
-    </div>
+        {% include "modal/modal_flash.html" %}
+    </div>  
 {% endblock %}
 <!-- {% block script %}  
     <script src="{{ url_for('static', filename='js/uploadfile.js') }}"></script>  

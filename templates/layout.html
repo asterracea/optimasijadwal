@@ -1,27 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My App{% endblock %}</title>
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    {% block head %}{% endblock %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}My App{% endblock %}</title>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  {% block head %}{% endblock %}
 </head>
-<body>
-    <div class="w-dvw h-dvh bg-gray-100 grid grid-cols-7">
-        <!-- Sidebar -->
-        {% include 'sidebar.html' %}
-        
-        <!-- konten -->
-        <div class="col-span-6 bg-gray-100 p-4">
-            {% block content %}{% endblock %}
-        </div>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+  <header class="bg-white shadow p-4 flex items-center justify-between lg:hidden">
+    <button id="btn-hamburger" class="text-gray-700 focus:outline-none">
+      <i class="fas fa-bars fa-lg"></i>
+    </button>
+  </header>
+  <div class="flex flex-1 overflow-hidden">
+    <aside id="sidebar"
+      class="bg-white overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 z-30">
+      {% include 'sidebar.html' %}
+    </aside>
 
-        
-        
-    </div>
-    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script> 
-    {% block script %}{% endblock %}
+    <main
+      class="flex-1 overflow-auto p-6"
+      style="height: 100%;">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+  {% include "modal/modal_flash.html" %}
+  {% include 'modal/modal_logout.html' %}
+  <script>
+    const btnHamburger = document.getElementById('btn-hamburger');
+    const sidebar = document.getElementById('sidebar');
+
+    btnHamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+    });
+  </script>
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/logoutModal.js') }}"></script> 
+  {% block script %}{% endblock %}
 </body>
 </html>
