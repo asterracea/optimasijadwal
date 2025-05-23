@@ -1,0 +1,24 @@
+<div id="modalUpdate" class="hidden fixed inset-0 z-50 overflow-auto bg-smoke-light flex">
+  <div class="relative p-8 bg-white w-full max-w-md m-auto flex-col flex rounded-lg shadow-lg">
+    <form method="POST" id="editForm">
+      <input type="hidden" name="id_user" id="edit_id">
+
+      <label>Nama:</label>
+      <input type="text" name="nama" id="edit_nama" class="border rounded w-full mb-4">
+
+      <label>Role:</label>
+      <input type="text" name="role" id="edit_role" class="border rounded w-full mb-4">
+
+      <label>Status:</label>
+      <select name="status" id="edit_status" class="border rounded w-full mb-4">
+        <option value="aktif">Aktif</option>
+        <option value="nonaktif">Nonaktif</option>
+      </select>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" onclick="hideUpdateModalUser()" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Update</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -72,6 +72,7 @@
                                 {'name': 'Nama'},
                                 {'name': 'Role'},
                                 {'name': 'Status'},
+                                {'name': 'Action'},
                                 
                             ] %}
                             <tr>
@@ -108,7 +109,26 @@
                                         <span class="relative">{{ user.status }}</span>
                                     </span>
                                 </td>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <div class="flex space-x-3">
+                                        <!-- Edit -->
+                                         <button onclick="showUpdateModalUser('{{ user.id_user }}', '{{ user.nama }}', '{{ user.role }}', '{{ user.status }}')" 
+                                         class="text-blue-500 hover:text-blue-700" title="Edit"
+                                         >
+                                         <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <button onclick="document.getElementById('modalDelete-{{ user.id_user }}').classList.remove('hidden')"
+                                                class="text-red-500 hover:text-red-700"
+                                                title="Hapus">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
+                                {% include "modal/modal_delete.html" %}
+                                
+                                
                             {% endfor %}
                         </tbody>
 
@@ -117,6 +137,28 @@
             </div>
         </div>
     </div>
-    {% include "modal/modal_adduseradmin.html" %}
+    {% include "modal/modal_adduser.html" %}
+    {% include "modal/modal_updateuser.html" %}
+    {% include "modal/modal_flash.html" %}
+
+    <script>
+    function showUpdateModalUser(id, nama, role, status) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_nama').value = nama;
+        document.getElementById('edit_role').value = role;
+        document.getElementById('edit_status').value = status;
+         // Ubah form action
+        document.getElementById('editForm').action = `/user/datauser/edit/${id}`;
+
+        // Tampilkan modal
+        document.getElementById('modalUpdate').classList.remove('hidden');
+    }
+    function hideUpdateModalUser() {
+        document.getElementById("modalUpdate").classList.add("hidden");
+    }
+
+    
+
+    </script>
 </body>
 {% endblock %}

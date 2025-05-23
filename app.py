@@ -205,9 +205,9 @@ def data_rombel():
         rombel_data = result.mappings().all()
     return render_template("page/data_rombel.html",rombels=rombel_data, active_page='data_rombel')
 
-@app.route("/user/dataadmin", methods=["GET", "POST"])
+@app.route("/user/datauser", methods=["GET", "POST"])
 @jwt_required()
-def user_admin():
+def data_user():
     if request.method == "POST":
         # Ambil data dari form
         nama = request.form.get("addnama")
@@ -220,10 +220,10 @@ def user_admin():
         # Validasi sederhana password
         if password != conpassword:
             flash("Password dan Konfirmasi Password tidak cocok.", "error")
-            return redirect(url_for("user_admin"))
+            return redirect(url_for("data_user"))
         if not (nama and email and role and status and password):
             flash("Semua field wajib diisi.", "warning")
-            return redirect(url_for("user_admin"))
+            return redirect(url_for("data_user"))
     
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
         try:
@@ -242,17 +242,71 @@ def user_admin():
                 connection.commit()
 
             flash("User admin berhasil ditambahkan.", "success")
-            return redirect(url_for("user_admin"))
+            return redirect(url_for("data_user"))
         except Exception as e:
             flash(f"Gagal menambah user: {e}", "danger")
-            return redirect(url_for("user_admin"))
+            return redirect(url_for("data_user"))
 
     with db_url.connect() as connection:
-        query = text("SELECT * FROM tb_user WHERE role = 'Admin'")
+        query = text("SELECT * FROM tb_user")
         result = connection.execute(query)
         admin_data = result.mappings().all()
         column_names = result.keys()
-    return render_template("page/user_admin.html", users=admin_data, columns=column_names,active_page='user_admin')
+    return render_template("page/user.html", users=admin_data, columns=column_names,active_page='data_user')
+
+@app.route("/user/datauser/edit/<int:user_id>", methods=["POST"])
+@jwt_required()
+def edit_user(user_id):
+    # Ambil data dari form
+    nama = request.form.get("nama")
+    role = request.form.get("role")
+    status = request.form.get("status")
+
+    # Validasi
+    if not (nama and role and status):
+        flash("Semua field wajib diisi.", "warning")
+        return redirect(url_for("data_user"))
+
+    try:
+        # Eksekusi query update
+        with db_url.connect() as connection:
+            with connection.begin():
+                update_query = text("""
+                    UPDATE tb_user
+                    SET nama = :nama, role = :role, status = :status
+                    WHERE id_user = :id
+                """)
+                connection.execute(update_query, {
+                    "nama": nama,
+                    "role": role,
+                    "status": status,
+                    "id": user_id
+                })
+
+        flash("User berhasil diperbarui.", "success")
+    except Exception as e:
+        flash(f"Gagal memperbarui user: {e}", "error")
+
+    return redirect(url_for("data_user"))
+
+@app.route("/user/datauser/delete/<int:user_id>", methods=["POST"])
+@jwt_required()
+def delete_user(user_id):
+    try:
+        with db_url.connect() as connection:
+            trans = connection.begin()  # Mulai transaksi
+            try:
+                delete_query = text("DELETE FROM tb_user WHERE id_user = :id")
+                connection.execute(delete_query, {"id": user_id})
+                trans.commit()  # Simpan perubahan
+                flash("User berhasil dihapus.", "success")
+            except Exception as e:
+                trans.rollback()  # Batalkan perubahan jika gagal
+                flash(f"Gagal menghapus user: {e}", "error")
+    except Exception as e:
+        flash(f"Terjadi kesalahan koneksi: {e}", "error")
+    
+    return redirect(url_for("data_user"))
 
 @app.route("/user/dataclient", methods=["GET","POST"])
 @jwt_required()

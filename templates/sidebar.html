@@ -34,35 +34,12 @@
                 {% endfor %}
             </div>
         </div> 
-        <div class="relative group">                    
-            <button onclick="toggleSubmenudat()" class="flex items-center justify-center lg:justify-start w-full rounded-md h-12 px-4 font-semibold text-gray-500 hover:text-blue-500 focus:outline-none">
-                <i class="fas fa-database mr-2 text-[#003b73]"></i>
-                <span class="hidden lg:block text-[#003b73]">Users</span>
-                <i class="fas fa-chevron-down ml-1 md:ml-auto hidden lg:block"></i>
-            </button>
-
-            <!-- dropdown -->
-            <div id="submenudat" class="flex-col lg:ml-8 ml-4 mt-2 space-y-1 {% if active_page in ['user_admin','user_client'] %}
-                    block
-                {% else %}
-                    hidden
-                {% endif %}">
-                {% set data_menu = [
-                    {'name': 'Data Admin', 'url': '/user/dataadmin', 'id': 'user_admin'},
-                    {'name': 'Data Client', 'url': '/user/dataclient', 'id': 'user_client'},                    
-                ] %}
-                {% for item in data_menu %}
-                <a class="block px-4 py-2 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#bfd7ed] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
-                    href="{{item.url}}">
-                    {{item.name}}
-                </a>
-                {% endfor %}
-            </div>
-        </div> 
         {% set main_menu = [
             {'name': 'Generate Jadwal', 'icon': 'fa-home', 'url': '/dashboard', 'id': 'dashboard'},
-            {'name': 'Hasil Optimasi', 'icon': 'fa-calendar-days', 'url': '/jadwal', 'id': 'hasiljadwal'},            
-            {'name': 'Pengaturan', 'icon': 'fa-gear', 'url': '/settings', 'id': 'pengaturan'}
+            {'name': 'Hasil Optimasi', 'icon': 'fa-calendar-days', 'url': '/jadwal', 'id': 'hasiljadwal'},    
+            {'name': 'User', 'icon': 'fa-user', 'url': '/user/datauser', 'id': 'data_user'},        
+            {'name': 'Pengaturan', 'icon': 'fa-gear', 'url': '/settings', 'id': 'pengaturan'},
+
         ] %}
         {% for item in main_menu %}
             <a href="{{item.url}}" class="flex items-center justify-center lg:justify-start rounded-md h-12 px-4 font-semibold {% if active_page == item.id %} bg-[#003b73] text-white {% else %} text-[#003b73] hover:text-blue-500 {% endif %}">
