@@ -113,7 +113,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-blue-600 underline cursor-pointer" onclick='showDetail({{ item.detail | tojson | safe }})'>
+                        <td class="px-6 py-4 text-sm text-blue-600 underline cursor-pointer" data-detail='{{ item.detail | tojson | safe }}' onclick="showDetail(this)">
                             Detail
                         </td>
                         
@@ -125,7 +125,8 @@
             </div>
     </div>
     <script>
-    function showDetail(jsonData) {
+    function showDetail(el) {
+        const jsonData = JSON.parse(el.getAttribute("data-detail"));
         const modal = document.getElementById("jsonModal");
         modal.classList.remove("hidden");
 
