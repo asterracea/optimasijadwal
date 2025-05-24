@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response,session,logging
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity,  decode_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt, get_jwt_identity,  decode_token
 from config import db_url
 from flask_bcrypt import Bcrypt
 import pandas as pd
@@ -65,7 +65,8 @@ def login():
                     # Buat JWT token
                     additional_claims = {
                         "email": email,
-                        "role": role
+                        "role": role,
+                        "nama": nama,
                     }
                     access_token = create_access_token(
                         identity=str(id_user),  # JWT identity HARUS string
@@ -86,21 +87,22 @@ def login():
 @app.route("/dashboard")
 @jwt_required()
 def dashboard():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
     current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT id_generate FROM tb_generate where status='belum'"))
         id_generates = result.mappings().all()
-    return render_template("page/dashboard.html", generates=id_generates, active_page='dashboard',user=current_user)
+    return render_template("page/dashboard.html", generates=id_generates, active_page='dashboard', user=current_user, nama_user=nama_user,role_user=role_user)
 
 @app.route('/generate-jadwal', methods=['GET','POST'])
 @jwt_required()
 def generate_jadwal():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role") 
     if request.method == 'POST':
         id_generate = request.form.get('id_generate')
         alpha = float(request.form.get('alpha'))
@@ -122,7 +124,7 @@ def generate_jadwal():
 
         
         # flash('Jadwal berhasil digenerate!', 'success')
-        return render_template('page/dashboard.html', data=jadwal_list)
+        return render_template('page/dashboard.html', data=jadwal_list, nama_user=nama_user,role_user=role_user)
     return redirect(url_for('dashboard'))
 
 @app.route('/receive-json', methods=['POST'])
@@ -145,69 +147,79 @@ def optimasi_callback():
 @app.route("/data/dosen")
 @jwt_required()
 def data_dosen():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_dosen"))
         dosen_data = result.mappings().all()
-    return render_template("page/data_dosen.html", dosens=dosen_data, active_page='data_dosen')
+    return render_template("page/data_dosen.html", dosens=dosen_data, active_page='data_dosen', nama_user=nama_user,role_user=role_user)
 
     
 @app.route("/data/matakuliah")
 @jwt_required()
 def data_matakuliah():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_matakuliah"))
         matkul_data = result.mappings().all()
-    return render_template("page/data_matakuliah.html", matkuls=matkul_data, active_page='data_matakuliah')
+    return render_template("page/data_matakuliah.html", matkuls=matkul_data, active_page='data_matakuliah', nama_user=nama_user,role_user=role_user)
 @app.route("/data/perkuliahan")
 @jwt_required()
 def data_perkuliahan():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_perkuliahan"))
         perkuliahan_data = result.mappings().all()
-    return render_template("page/data_perkuliahan.html",perkuliahans=perkuliahan_data, active_page='data_perkuliahan')
+    return render_template("page/data_perkuliahan.html",perkuliahans=perkuliahan_data, active_page='data_perkuliahan', nama_user=nama_user,role_user=role_user)
 @app.route("/data/generate")
 @jwt_required()
 def data_generate():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_generate"))
         generate_data = result.mappings().all()
-    return render_template("page/data_generate.html",generates=generate_data, active_page='data_generate')
+    return render_template("page/data_generate.html",generates=generate_data, active_page='data_generate', nama_user=nama_user,role_user=role_user)
 @app.route("/data/ruang")
 @jwt_required()
 def data_ruang():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_ruang"))
         ruang_data = result.mappings().all()
-    return render_template("page/data_ruang.html",ruangs=ruang_data, active_page='data_ruang')
+    return render_template("page/data_ruang.html",ruangs=ruang_data, active_page='data_ruang', nama_user=nama_user,role_user=role_user)
 @app.route("/data/rombel")
 @jwt_required()
 def data_rombel():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         result = connection.execute(text("SELECT * FROM tb_rombel"))
         rombel_data = result.mappings().all()
-    return render_template("page/data_rombel.html",rombels=rombel_data, active_page='data_rombel')
+    return render_template("page/data_rombel.html",rombels=rombel_data, active_page='data_rombel', nama_user=nama_user,role_user=role_user)
 
 @app.route("/user/datauser", methods=["GET", "POST"])
 @jwt_required()
 def data_user():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     if request.method == "POST":
         # Ambil data dari form
         nama = request.form.get("addnama")
@@ -252,7 +264,7 @@ def data_user():
         result = connection.execute(query)
         admin_data = result.mappings().all()
         column_names = result.keys()
-    return render_template("page/user.html", users=admin_data, columns=column_names,active_page='data_user')
+    return render_template("page/user.html", users=admin_data, columns=column_names,active_page='data_user', nama_user=nama_user,role_user=role_user)
 
 @app.route("/user/datauser/edit/<int:user_id>", methods=["POST"])
 @jwt_required()
@@ -308,58 +320,13 @@ def delete_user(user_id):
     
     return redirect(url_for("data_user"))
 
-@app.route("/user/dataclient", methods=["GET","POST"])
-@jwt_required()
-def user_client():
-    if request.method == "POST":
-        # Ambil data dari form
-        nama = request.form.get("addnama")
-        email = request.form.get("addemail")
-        role = request.form.get("addrole")
-        status = request.form.get("addstatus")
-        password = request.form.get("addpassword")
-        conpassword = request.form.get("addconpassword")
-
-        # Validasi sederhana password
-        if password != conpassword:
-            flash("Password dan Konfirmasi Password tidak cocok.", "error")
-            return redirect(url_for("user_client"))
-        if not (nama and email and role and status and password):
-            flash("Semua field wajib diisi.", "warning")
-            return redirect(url_for("user_client"))
-    
-        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-        try:
-            with db_url.connect() as connection:
-                insert_query = text("""
-                    INSERT INTO tb_user (nama, email, role, status, password)
-                    VALUES (:nama, :email, :role, :status, :password)
-                """)
-                connection.execute(insert_query, {
-                    "nama": nama,
-                    "email": email,
-                    "role": role,
-                    "status": status,
-                    "password": hashed_password
-                })
-                connection.commit()
-
-            flash("User client berhasil ditambahkan.", "success")
-            return redirect(url_for("user_client"))
-        except Exception as e:
-            flash(f"Gagal menambah user: {e}", "danger")
-            return redirect(url_for("user_client"))
-
-    with db_url.connect() as connection:
-        query = text("SELECT * FROM tb_user WHERE role = 'user'")
-        result = connection.execute(query)
-        admin_data = result.mappings().all()
-        column_names = result.keys()
-    return render_template("page/user_client.html", users=admin_data, columns=column_names,active_page='user_client')
-
 @app.route("/jadwal", methods=["POST", "GET"])
 @jwt_required()
 def data_hasil():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
     with db_url.connect() as connection:
         # Ambil semua id_generate dari tabel generate
         opsi_id = connection.execute(
@@ -377,16 +344,19 @@ def data_hasil():
                     {"id_generate": selected_id}
                 )
                 jadwal_data = result.mappings().all()
-    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal')
+    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal', nama_user=nama_user,role_user=role_user)
 
 @app.route("/settings", methods=["GET","POST"])
 @jwt_required()
 def setting():
-    current_user_id = get_jwt_identity()
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
 
     with db_url.connect() as connection:
         query = text("SELECT nama, email FROM tb_user WHERE id_user = :id_user")
-        result = connection.execute(query, {"id_user": current_user_id}).fetchone()
+        result = connection.execute(query, {"id_user": current_user}).fetchone()
 
     if not result:
         flash("User tidak ditemukan.", "danger")
@@ -404,7 +374,7 @@ def setting():
             try:
                 with db_url.begin() as connection:
                     update_query = text("UPDATE tb_user SET nama = :nama WHERE id_user = :id_user")
-                    connection.execute(update_query, {"nama": new_nama, "id_user": current_user_id})
+                    connection.execute(update_query, {"nama": new_nama, "id_user": current_user})
                 
                 flash("Nama berhasil diperbarui.", "success")
             except Exception as e:
@@ -413,12 +383,12 @@ def setting():
             return redirect(url_for("setting"))
 
     user_info = {"nama": nama, "email": email}
-    return render_template("page/setting.html", user=user_info, active_page='pengaturan')
+    return render_template("page/setting.html", user=user_info, active_page='pengaturan', nama_user=nama_user,role_user=role_user)
 
 @app.route("/ubah-password", methods=["POST"])
 @jwt_required()
 def ubah_password():
-    current_user_id = get_jwt_identity()
+    current_user = get_jwt_identity()
 
     password_lama = request.form.get("passwordlama")
     password_baru = request.form.get("passwordbaru")
@@ -434,12 +404,12 @@ def ubah_password():
 
     with db_url.connect() as connection:
         query = text("SELECT password FROM tb_user WHERE id_user = :id_user")
-        result = connection.execute(query, {"id_user": current_user_id}).fetchone()
+        result = connection.execute(query, {"id_user": current_user}).fetchone()
 
         if result and bcrypt.check_password_hash(result[0], password_lama):
             password_hash_baru = bcrypt.generate_password_hash(password_baru).decode("utf-8")
             update_query = text("UPDATE tb_user SET password = :new_password WHERE id_user = :id_user")
-            connection.execute(update_query, {"new_password": password_hash_baru, "id_user": current_user_id})
+            connection.execute(update_query, {"new_password": password_hash_baru, "id_user": current_user})
             connection.commit()
             flash("Password berhasil diubah.", "success")
         else:
@@ -450,7 +420,11 @@ def ubah_password():
 @app.route("/daftar-endpoint")
 @jwt_required()
 def daftar_endpoint():
-    return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint')
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
+    return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint', nama_user=nama_user,role_user=role_user)
 
 
 @app.route("/logout")

@@ -27,9 +27,27 @@
 
     <!-- Header hanya di mobile -->
     <header class="bg-white shadow p-4 flex items-center justify-between lg:hidden">
-      <button id="btn-hamburger" class="text-[#003b73] focus:outline-none">
+      <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
+      <button id="btn-hamburger" class="text-[#003b73] focus:outline-none" aria-label="Toggle navigation">
         <i class="fas fa-bars fa-lg"></i>
       </button>
+    </header>
+
+    <!-- Header untuk desktop (ditampilkan saat layar besar / lg:flex) -->
+    <header class="bg-white shadow p-4 hidden lg:flex items-center justify-between">
+      <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <p class="text-sm text-gray-600">Hi, <span class="font-medium text-gray-800">{{ nama_user }}</span></p>
+          <p class="text-xs text-gray-500 capitalize">{{ role_user }}</p>
+        </div>
+        <!-- Icon user opsional -->
+        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+          <img class="w-full h-full rounded-full"
+                                                  src="https://ui-avatars.com/api/?name={{ nama_user | urlencode }}&background=random&color=fff"
+                                                  alt="Avatar {{ nama_user }}" />
+        </div>
+      </div>
     </header>
 
     <!-- Konten utama yang bisa discroll -->
