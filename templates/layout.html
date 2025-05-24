@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}My App{% endblock %}</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   {% block head %}{% endblock %}
 </head>
@@ -17,7 +19,7 @@
 
   <!-- Overlay untuk mobile -->
   <div id="overlay"
-       class="fixed inset-0 bg-gray-500/75 z-20 hidden lg:hidden"
+       class="fixed inset-0  bg-gray-500/75 z-20 hidden lg:hidden"
        onclick="closeSidebar()"></div>
 
   <!-- Wrapper konten (digeser karena sidebar 64) -->
@@ -25,7 +27,7 @@
 
     <!-- Header hanya di mobile -->
     <header class="bg-white shadow p-4 flex items-center justify-between lg:hidden">
-      <button id="btn-hamburger" class="text-gray-700 focus:outline-none">
+      <button id="btn-hamburger" class="text-[#003b73] focus:outline-none">
         <i class="fas fa-bars fa-lg"></i>
       </button>
     </header>

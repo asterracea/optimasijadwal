@@ -1,0 +1,149 @@
+{% extends 'layout.html' %}
+{% block title %} Hasil Jadwal {% endblock %}
+{% block content %}
+<div class="rounded-lg">
+        <div class="bg-gradient-to-r from-[#003b73] to-[#0056b3] rounded-t-lg shadow-lg">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-center">
+                        <h1 class="text-white items-center text-3xl font-bold mb-2">DOKUMENTASI API</h1>    
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto ">
+            
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-slate-50">
+                    {% set thead = [
+                        {'name': 'Metode Http'},
+                        {'name': 'URI'},
+                        {'name': 'Keteranagan'},
+                        {'name': 'detail'},
+
+                    ] %}
+                    <tr>
+                        {% for item in thead %}
+                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">{{item.name}}</th>
+                        {% endfor %}
+
+                    </tr>
+                </thead>
+                
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% set tbody = [{
+                                        "methods": "GET",
+                                        "uri": "/receive-json",
+                                        "description": "digunakan untuk menerima data penjadwalan",
+                                        "detail": {
+                                        "setJadwal": [
+                                            {
+                                            "id_perkuliahan": 96,
+                                            "id_kelasrombel": 7,
+                                            "id_semester": 3,
+                                            "id_kurikulum": 3,
+                                            "kode_dosen": 32,
+                                            "kode_matakuliah": "KTI",
+                                            "sks": 2,
+                                            "status": "Kelas",
+                                            "nama_dosen": "Agus",
+                                            "nama_semester": "Semester 3",
+                                            "nama_matakuliah": "Konsep TI",
+                                            "nama_kelas": "A"
+                                            },
+    
+                                        ],
+                                        "setRuang": [
+                                            {
+                                            "kode_ruang": "L301",
+                                            "nama_ruangan": "Lab 301",
+                                            "status_ruangan": "Lab"
+                                            },
+                                        ],
+                                        "setWaktu": [
+                                            {
+                                            "id_waktu": 5,
+                                            "id_hari": 1,
+                                            "jam_mulai": "07:00:00",
+                                            "jam_selesai": "07:50:00",
+                                            "nama_hari": "Senin"
+                                            },
+                                            
+                                        ]
+                                        }
+                                    },
+                                    {
+                                    "methods": "POST",
+                                    "uri": "/callback",
+                                    "description": "digunakan untuk mengirim data hasil generate",
+                                    "detail": {
+                                        "setjadwal": [
+                                            {
+                                                "hari": "Jumat",
+                                                "waktu_mulai": "10:20",    
+                                                "waktu_selesai": "12:00",  
+                                                "kelas": "B",
+                                                "mata_kuliah": "Konsep TI",
+                                                "nama_dosen": "ivana",     
+                                                "ruang": "Ruang302",       
+                                                "semester": "3",
+                                                "temp_perkuliahan": "97"   
+                                            }
+                                        ]
+                                    }
+                                }
+
+                                    ]
+                             %}
+                    {% for item in tbody %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {{item.methods}}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-700">{{item.uri}}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-700">{{item.description}}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-blue-600 underline cursor-pointer" onclick='showDetail({{ item.detail | tojson | safe }})'>
+                            Detail
+                        </td>
+                        
+                    </tr>
+                    {% include "modal/modal_json.html"%}
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+    </div>
+    <script>
+    function showDetail(jsonData) {
+        const modal = document.getElementById("jsonModal");
+        modal.classList.remove("hidden");
+
+        const editor = ace.edit("jsonEditor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/json");
+        editor.setValue(JSON.stringify(jsonData, null, 2), -1); // pretty print
+        editor.setOptions({
+        readOnly: false,
+        fontSize: "14px",
+        showPrintMargin: false
+        });
+    }
+
+    function closeModal() {
+        document.getElementById("jsonModal").classList.add("hidden");
+    }
+    </script>
+
+
+{% endblock %}

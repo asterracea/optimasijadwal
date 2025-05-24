@@ -357,16 +357,27 @@ def user_client():
         column_names = result.keys()
     return render_template("page/user_client.html", users=admin_data, columns=column_names,active_page='user_client')
 
-@app.route("/jadwal")
+@app.route("/jadwal", methods=["POST", "GET"])
 @jwt_required()
 def data_hasil():
-    # if 'id_user' not in session:
-    #     flash("Silakan login terlebih dahulu.", "warning")
-    #     return redirect(url_for("login"))
     with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_hasil"))
-        jadwal_data = result.mappings().all()
-    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, active_page='hasiljadwal')
+        # Ambil semua id_generate dari tabel generate
+        opsi_id = connection.execute(
+            text("SELECT DISTINCT p.id_generate FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan JOIN tb_generate g ON p.id_generate = g.id_generate WHERE g.status = 'sudah'")
+        ).mappings().all()
+
+        jadwal_data = []
+        selected_id = None
+
+        if request.method == "POST":
+            selected_id = request.form.get("id_generate")
+            if selected_id:
+                result = connection.execute(
+                    text("SELECT h.* FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan WHERE p.id_generate = :id_generate"),
+                    {"id_generate": selected_id}
+                )
+                jadwal_data = result.mappings().all()
+    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal')
 
 @app.route("/settings", methods=["GET","POST"])
 @jwt_required()
@@ -435,6 +446,11 @@ def ubah_password():
             flash("Password lama salah.", "danger")
 
     return redirect(url_for("setting"))
+
+@app.route("/daftar-endpoint")
+@jwt_required()
+def daftar_endpoint():
+    return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint')
 
 
 @app.route("/logout")
