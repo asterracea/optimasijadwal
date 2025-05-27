@@ -1,19 +1,23 @@
 from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response,session,logging
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt, get_jwt_identity,  decode_token
+from routes.auth_api import api
 from config import db_url
 from flask_bcrypt import Bcrypt
 import pandas as pd
-from insertDB import simpanData
 from sqlalchemy import create_engine, text
 from algoritma.optimasiSA import PenjadwalanSA
 
 
 app = Flask(__name__)
+app.register_blueprint(api)
+
 app.secret_key = "kyutpipel"
 app.config["JWT_SECRET_KEY"] = "semhaslancar"
-app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_TOKEN_LOCATION"] = ["cookies","headers"]
 app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
 app.config["JWT_COOKIE_CSRF_PROTECT"] = False #sementara
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
@@ -31,6 +35,18 @@ def invalid_token_callback(callback):
 def expired_token_callback(jwt_header, jwt_payload):
     flash("Sesi Anda telah habis. Silakan login ulang.", "warning")
     return redirect(url_for('login'))
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return jsonify({"msg": "Missing or invalid JWT"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(callback):
+    print("Invalid token error:", callback)
+    return jsonify(msg='Invalid token'), 422
+
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({"msg": "Token has expired"}), 401
 
 
 @app.route("/",methods=["GET", "POST"])
@@ -127,17 +143,7 @@ def generate_jadwal():
         return render_template('page/dashboard.html', data=jadwal_list, nama_user=nama_user,role_user=role_user)
     return redirect(url_for('dashboard'))
 
-@app.route('/receive-json', methods=['POST'])
-@jwt_required()
-def receive_json():
-    try: 
-        data = request.get_json()
-        simpanData(data)
-        return jsonify({"status": "successss"}), 200
-    except Exception as e:
-        print("Error parsing JSON:", e)
-        return jsonify({"status": "failed", "error": str(e)}), 400
-    
+   
 @app.route('/callback', methods=['POST'])
 def optimasi_callback():
     data = request.get_json()

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 from datetime import datetime
 
-def simpanData(json_data):
+def simpanData(json_data, id_user):
     try:
         df_setjadwal = pd.json_normalize(json_data['setJadwal'])
         df_setruang = pd.json_normalize(json_data['setRuang'])
@@ -21,8 +21,8 @@ def simpanData(json_data):
 
 
             connection.execute(
-                text("INSERT INTO tb_generate (id_generate, waktu_generate) VALUES (:id_generate, NOW())"),
-                {"id_generate": idGenerate}
+                text("INSERT INTO tb_generate (id_generate, id_user, waktu_generate) VALUES (:id_generate, :id_user,NOW())"),
+                {"id_generate": idGenerate,"id_user" : id_user}
             )
 
         # PREPARE DATAFRAME
