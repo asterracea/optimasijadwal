@@ -13,13 +13,13 @@
 <body class="bg-slate-100 h-screen overflow-hidden">
 
   <!-- Sidebar (tetap) -->
-  <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full" id="sidebar">
+  <div class="fixed inset-y-0 left-0 w-64 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full" id="sidebar">
     {% include 'sidebar.html' %}
   </div>
 
   <!-- Overlay untuk mobile -->
   <div id="overlay"
-       class="fixed inset-0  bg-gray-500/75 z-20 hidden lg:hidden"
+       class="fixed inset-0 z-20 hidden lg:hidden"
        onclick="closeSidebar()"></div>
 
   <!-- Wrapper konten (digeser karena sidebar 64) -->
@@ -28,13 +28,13 @@
     <!-- Header hanya di mobile -->
     <header class="bg-white shadow p-4 flex items-center justify-between lg:hidden">
       <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
-      <button id="btn-hamburger" class="text-[#003b73] focus:outline-none" aria-label="Toggle navigation">
+      <button id="btn-hamburger" class="text-[#bfd7ed] focus:outline-none" aria-label="Toggle navigation">
         <i class="fas fa-bars fa-lg"></i>
       </button>
     </header>
 
     <!-- Header untuk desktop (ditampilkan saat layar besar / lg:flex) -->
-    <header class="bg-white shadow p-4 hidden lg:flex items-center justify-between">
+    <header class="bg-white rounded-l-xl shadow p-4 ml-5 hidden lg:flex items-center justify-between">
       <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
       <div class="flex items-center gap-4">
         <div class="text-right">
@@ -52,11 +52,11 @@
 
     <!-- Konten utama yang bisa discroll -->
     <main class="flex-1 overflow-auto p-6">
-      <div class="overflow-x-auto">
+  
         {% block content %}
         <!-- Tabel atau konten di sini -->
         {% endblock %}
-      </div>
+
     </main>
   </div>
 

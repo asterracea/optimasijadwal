@@ -1,16 +1,18 @@
 {% extends 'layout.html' %}
 {% block title %} data generate {% endblock %}
 {% block content %}
-    <div class="bg-white p-6 rounded-lg shadow">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
         <div class="overflow-x-auto">
             <div class="max-h-[500px] overflow-y-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         {% set thead = [
                             {'name':'No'},
-                            {'name': 'ID'},
+                            {'name': 'idgenerate'},
+                            {'name': 'Id user'},
                             {'name': 'Waktu'},
                             {'name': 'Status'},
+                            {'name': 'Aksi'},
                         ] %}
                         <tr>
                             {% for item in thead%}
@@ -36,6 +38,13 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ item.id_user }}</div>
+                                        </div>
+                                    </div>                                    
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ item.waktu_generate }}</div>
                                         </div>
                                     </div>                                    
@@ -46,7 +55,18 @@
                                             <div class="text-sm font-medium text-gray-900">{{ item.status }}</div>
                                         </div>
                                     </div>                                    
-                                </td>                             
+                                </td> 
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    
+                                        
+                                        <button
+                                                class="text-red-500 hover:text-red-700"
+                                                title="Hapus"
+                                                id="delidgen">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                  
+                                </td>                            
     
                             </tr>
                         {% endfor %}

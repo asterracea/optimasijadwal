@@ -1,4 +1,4 @@
-<div class="col-span-1 rounded-r-2xl bg-white border-r border-gray-200 flex flex-col h-full p-3">
+<div class="col-span-1 rounded-r-3xl bg-white shadow-lg border-r border-gray-200 flex flex-col h-full p-3">
     <div class="flex flex-col flex-grow overflow-y-auto">
         <div class="px-5 pt-4 hidden lg:block">
             <div class="text-xs font-bold tracking-wide text-gray-600">Menu</div>
@@ -27,7 +27,7 @@
                     
                 ] %}
                 {% for item in data_menu %}
-                <a class="block px-4 py-2 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#bfd7ed] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
+                <a class="block px-4 py-2 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#003b73] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
                     href="{{item.url}}">
                     {{item.name}}
                 </a>

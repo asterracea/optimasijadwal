@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block title %}Generate Jadwal{% endblock %}
 {% block content %}
-    <div class="bg-white p-6 rounded-lg shadow">
+    <div class="bg-white shadow-lg p-6 rounded-lg">
         <form action="{{ url_for('generate_jadwal') }}" method="POST">
             <div class="flex gap-6 item-start">
                 <div class="w-1/2">
