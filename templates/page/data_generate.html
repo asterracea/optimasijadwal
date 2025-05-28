@@ -62,7 +62,9 @@
                                         <button
                                                 class="text-red-500 hover:text-red-700"
                                                 title="Hapus"
-                                                id="delidgen">
+                                                data-id="{{ item.id_generate }}"
+                                                data-modal-target="deleteModal"
+                                                data-modal-toggle="deleteModal">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                   
@@ -81,6 +83,9 @@
                 </table>
             </div>
         </div>
+        {% include "modal/modal_deletegen.html" %}
     </div>
+    <script src="{{ url_for('static', filename='js/deletemodalgenerate.js') }}"></script>
 {% endblock %}
+
         

@@ -196,6 +196,24 @@ def data_generate():
         result = connection.execute(text("SELECT * FROM tb_generate"))
         generate_data = result.mappings().all()
     return render_template("page/data_generate.html",generates=generate_data, active_page='data_generate', nama_user=nama_user,role_user=role_user)
+
+@app.route("/data/generate/delete/<string:id_generate>", methods=["POST"])
+@jwt_required()
+def delete_generate(id_generate):
+    try:
+        with db_url.connect() as connection:
+            trans = connection.begin()
+            try:
+                delete_query = text("DELETE FROM tb_generate WHERE id_generate = :id")
+                connection.execute(delete_query, {"id": id_generate})
+                trans.commit()
+                flash("Data generate berhasil dihapus.", "success")
+            except Exception as e:
+                trans.rollback()
+                flash(f"Gagal menghapus data generate: {e}", "error")
+    except Exception as e:
+        flash(f"Terjadi kesalahan koneksi: {e}", "error")
+    return redirect(url_for("data_generate"))
 @app.route("/data/ruang")
 @jwt_required()
 def data_ruang():
