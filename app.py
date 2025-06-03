@@ -368,7 +368,26 @@ def data_hasil():
                     {"id_generate": selected_id}
                 )
                 jadwal_data = result.mappings().all()
-    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal', nama_user=nama_user,role_user=role_user)
+
+        bentrok = connection.execute(
+            text("""
+                SELECT 
+                    a.id_hasil AS id1, b.id_hasil AS id2,
+                    a.hari, a.waktu_mulai, a.waktu_selesai,
+                    b.waktu_mulai AS b_mulai, b.waktu_selesai AS b_selesai,
+                    a.nama_dosen, a.ruang
+                FROM tb_hasil a
+                JOIN tb_hasil b ON a.id_hasil != b.id_hasil
+                JOIN tb_perkuliahan pa ON a.id_perkuliahan = pa.id_perkuliahan
+                JOIN tb_perkuliahan pb ON b.id_perkuliahan = pb.id_perkuliahan
+                WHERE pa.id_generate = :id_generate AND pb.id_generate = :id_generate
+                AND a.hari = b.hari
+                AND (a.nama_dosen = b.nama_dosen OR a.ruang = b.ruang)
+                AND a.waktu_mulai < b.waktu_selesai
+                AND a.waktu_selesai > b.waktu_mulai
+            """), {"id_generate": selected_id}
+        ).mappings().all()
+    return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal', nama_user=nama_user,role_user=role_user,bentrok=bentrok)
 
 @app.route("/settings", methods=["GET","POST"])
 @jwt_required()
@@ -449,6 +468,14 @@ def daftar_endpoint():
     nama_user = claims.get("nama")
     role_user = claims.get("role")
     return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint', nama_user=nama_user,role_user=role_user)
+@app.route("/send-data")
+@jwt_required()
+def kirim_hasil():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
+    return render_template("page/kirim_hasil.html", active_page='send_data', nama_user=nama_user,role_user=role_user)
 
 
 @app.route("/logout")

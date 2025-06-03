@@ -14,3 +14,4 @@ document.addEventListener("DOMContentLoaded", function () {
   function closeModal() {
     document.getElementById("modalDeleteGen").classList.add("hidden");
   }
+y

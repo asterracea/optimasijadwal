@@ -30,8 +30,8 @@
                 
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% set tbody = [{
-                                        "methods": "GET",
-                                        "uri": "/receive-json",
+                                        "methods": "POST",
+                                        "uri": "api/receive-data",
                                         "description": "digunakan untuk menerima data penjadwalan",
                                         "detail": {
                                         "setJadwal": [
@@ -87,10 +87,20 @@
                                                 "semester": "3",
                                                 "temp_perkuliahan": "97"   
                                             }
-                                        ]
+                                        ]}
+                                    },
+                                    {
+                                    "methods": "POST",
+                                    "uri": "api/auth-login",
+                                    "description": "digunakan agar client mendapatkan akses token",
+                                    "detail": {
+                                        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0ODkxMDIyMywianRpIjoiZGEyMjI4OTMtOWY1ZC00OWZlLTkxOTYtODNlZDc3NGRlNGM0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEzIiwibmJmIjoxNzQ4OTEwMjIzLCJleHAiOjE3NDg5MTExMjN9.XgHA_Y5L_4PI_E6Eh_5W1Rw7mgL_4l05j23IcVFb6IY",
+                                        "user_info": {
+                                        "email": "admin1@gmail.com",
+                                        "id_user": 13
+                                        }
                                     }
-                                }
-
+                                    }
                                     ]
                              %}
                     {% for item in tbody %}
