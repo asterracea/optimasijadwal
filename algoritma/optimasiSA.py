@@ -181,83 +181,102 @@ class PenjadwalanSA:
                 ruang = random.choice(ruang_valid)
                 hari = random.choice(self.daftar_hari)
                 
-                # Mencari slot waktu yang tidak bertabrakan
-                for _ in range(100): 
+                sukses = False
+                for _ in range(1000):  # Dulu 100, sekarang 1000 agar lebih banyak mencoba
                     waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori))
-                    waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks,matkul.kategori)
+                    waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks, matkul.kategori)
                     waktu = (waktu_mulai, waktu_selesai)
 
-                    # Periksa apakah slot ini bentrok untuk kelas yang sama
                     class_key = (matkul.kelas, hari)
                     if class_key not in class_schedule:
                         class_schedule[class_key] = []
-                    
+
                     conflict = False
                     for existing_slot in class_schedule[class_key]:
-                        existing_start, existing_end = existing_slot
-                        if not (waktu_selesai <= existing_start or waktu_mulai >= existing_end):
+                        if not (waktu_selesai <= existing_slot[0] or waktu_mulai >= existing_slot[1]):
                             conflict = True
                             break
-                    
+
                     if not conflict:
-                        # Simpan slot ke jadwal kelas agar tidak dipakai lagi
-                        class_schedule[class_key].append((waktu_mulai, waktu_selesai))
+                        class_schedule[class_key].append(waktu)
                         jadwal_awal.append((matkul, ruang, hari, waktu))
-                        break  # Keluar dari loop setelah menemukan slot yang valid
+                        sukses = True
+                        break
+
+                if not sukses:
+                    # Tandai sebagai gagal dijadwalkan
+                    jadwal_awal.append((matkul, ruang, hari, (-1, -1)))
         return jadwal_awal
 
     def evaluate_solution(self, solution):
         score = 0
         slot_used = {}
-        class_schedule = {} #menyimpan jadwal masing kelas per hari untuk cek bentrok
+        class_schedule = {}
 
         for matkul, ruang, hari, waktu in solution:
+            if waktu == (-1, -1):
+                score += 1000  # Penalti sangat tinggi agar SA memprioritaskan perbaikannya
+                continue
+
             slot_key = (ruang.nama, hari, waktu)
             class_key = (matkul.kelas, hari)
 
-            # Cek apakah slot sudah digunakan oleh kelas lain
+            # Cek konflik ruang
             if slot_key in slot_used:
-                score += 5  # Penalti untuk konflik slot ruang
+                score += 5
             else:
-                slot_used[slot_key] = True  #tandai slot terpakai
+                slot_used[slot_key] = True
 
-            # Cek apakah kelas sudah memiliki mata kuliah dalam waktu yang sama
+            # Cek konflik jadwal kelas
             if class_key not in class_schedule:
                 class_schedule[class_key] = []
             
-            conflict = False
             waktu_mulai, waktu_selesai = waktu
+            conflict = False
             for existing_start, existing_end in class_schedule[class_key]:
                 if not (waktu_selesai <= existing_start or waktu_mulai >= existing_end):
                     conflict = True
                     break
 
             if conflict:
-                score += 10  # Penalti jika ada bentrok kelas
+                score += 10
             else:
                 class_schedule[class_key].append((waktu_mulai, waktu_selesai))
-        
+
         return score
 
-
     def get_neighbor(self, solution):
-        # Menghasilkan solusi tetangga dengan sedikit modifikasi pada solusi saat ini.
-        # pilih secara acak
         neighbor = solution[:]
-        idx = random.randint(0, len(solution) - 1)  # Pilih jadwal secara acak untuk dimodifikasi
-        matkul, ruang, hari, waktu = neighbor[idx]
 
-        # Pilih ruang dan hari lain secara acak
+        # Prioritaskan yang gagal dijadwalkan (waktu == (-1, -1))
+        index_gagal = [i for i, (_, _, _, waktu) in enumerate(neighbor) if waktu == (-1, -1)]
+
+        if index_gagal:
+            idx = random.choice(index_gagal)
+        else:
+            idx = random.randint(0, len(solution) - 1)
+
+        matkul, _, _, _ = neighbor[idx]
+
+        # Cari ruang yang sesuai
         tipe_valid = self.get_ruang(matkul.kategori)
-        ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang in tipe_valid]
-        if ruang_valid:
-            ruang = random.choice(ruang_valid)
-            hari = random.choice(self.daftar_hari)
-            
-            waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori))
-            waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks,matkul.kategori)
+        ruang_valid = [r for r in self.daftar_ruang if r.tipe_ruang in tipe_valid]
+        
+        if not ruang_valid:
+            return neighbor  # Tidak ada ruang valid, tidak bisa perbaiki
+
+        ruang = random.choice(ruang_valid)
+        hari = random.choice(self.daftar_hari)
+
+        max_start_index = len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori)
+        if max_start_index <= 0:
+            waktu = (-1, -1)
+        else:
+            waktu_mulai = random.randint(0, max_start_index)
+            waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks, matkul.kategori)
             waktu = (waktu_mulai, waktu_selesai)
-            # Perbarui jadwal
+
+        # Perbarui
         neighbor[idx] = (matkul, ruang, hari, waktu)
         return neighbor
 
