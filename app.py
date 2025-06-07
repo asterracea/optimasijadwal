@@ -41,18 +41,6 @@ def invalid_token_callback(callback):
 def expired_token_callback(jwt_header, jwt_payload):
     flash("Sesi Anda telah habis. Silakan login ulang.", "warning")
     return redirect(url_for('login'))
-@jwt.unauthorized_loader
-def unauthorized_response(callback):
-    return jsonify({"msg": "Missing or invalid JWT"}), 401
-
-# @jwt.invalid_token_loader
-# def invalid_token_callback(callback):
-#     print("Invalid token error:", callback)
-#     return jsonify(msg='Invalid token'), 422
-
-# @jwt.expired_token_loader
-# def expired_token_callback(jwt_header, jwt_payload):
-#     return jsonify({"msg": "Token has expired"}), 401
 
 
 @app.route("/",methods=["GET", "POST"])
@@ -396,7 +384,17 @@ def data_hasil():
             selected_id = request.form.get("id_generate")
             if selected_id:
                 result = connection.execute(
-                    text("SELECT h.* FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan WHERE p.id_generate = :id_generate"),
+                    text("""
+                        SELECT h.*,
+                        m.sks,
+                        s.nama_semester,
+                        p.nama_prodi 
+                        FROM tb_hasil h 
+                        JOIN tb_perkuliahan k ON h.id_perkuliahan = k.id_perkuliahan
+                        JOIN tb_matakuliah m ON k.kode_matakuliah = m.kode_matakuliah
+                        JOIN tb_prodi p ON k.kode_prodi = p.kode_prodi
+                        JOIN tb_semester s ON k.id_semester = s.id_semester 
+                        WHERE p.id_generate = :id_generate"""),
                     {"id_generate": selected_id}
                 )
                 jadwal_data = result.mappings().all()
