@@ -1,13 +1,14 @@
 {% extends 'layout.html' %}
 {% block title %} hasil {% endblock %}
 {% block content %}
-<div class="bg-white p-6 rounded-lg shadow-lg">
+
+<div class="bg-white p-6 rounded-lg  mb-6">
     <div class="flex justify-center mb-6">
         <div class="inline-flex items-center justify-center size-20 rounded-full bg-gray-100">
             <i class="fa-solid fa-user text-gray-400 text-4xl"></i>
         </div>
     </div>
-    <div class="flex flex-col md:flex-row mb-6">
+    <div class="flex flex-col md:flex-row">
         <div class="w-full md:w-1/5 mb-2 md:mb-0">
             <label class="text-gray-700 text-sm font-bold block">Informasi Akun</label>
         </div>
@@ -15,31 +16,29 @@
             <div class="flex flex-col mb-5">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="nama">Nama</label>
                 <input
-                class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="nama"
-                type="text"
-                value="{{ user.nama }}"
-                disabled
-                >
+                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="nama"
+                    type="text"
+                    value="{{ user.nama }}"
+                    disabled>
             </div>
             <div class="flex flex-col mb-5">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Alamat Email</label>
                 <input
-                class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="email"
-                type="text"
-                value="{{ user.email }}"
-                disabled
-                >
+                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="email"
+                    type="text"
+                    value="{{ user.email }}"
+                    disabled>
             </div>
             <div class="flex justify-end">
                 <button type="submit" id="btn-edit" class="items-center bg-[#0074B7] text-white px-4 py-2 rounded-full hover:bg-blue-900">Edit</button>
             </div>
-            
         </div>
     </div>
+</div>
 
-
+<div class="bg-white p-6 rounded-lg  mb-6">
     <div class="flex flex-col md:flex-row">
         <div class="w-full md:w-1/5 mb-2 md:mb-0">
             <label class="text-gray-700 text-sm font-bold block">Pengaturan Password</label>
@@ -49,101 +48,41 @@
                 <div class="flex flex-col mb-5">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordlama">Password Lama</label>
                     <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="passwordlama"
-                    name="passwordlama"
-                    type="password"
-                    placeholder="********"
-                    required
-                    >
+                        class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="passwordlama"
+                        name="passwordlama"
+                        type="password"
+                        placeholder="********"
+                        required>
                 </div>
                 <div class="flex flex-col mb-5">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordbaru">Password Baru</label>
                     <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="passwordbaru"
-                    name="passwordbaru"
-                    type="password"
-                    placeholder="********"
-                    required
-                    >
+                        class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="passwordbaru"
+                        name="passwordbaru"
+                        type="password"
+                        placeholder="********"
+                        required>
                 </div>
                 <div class="flex flex-col mb-5">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="passwordbaruconfirm">Konfirmasi Password Baru</label>
                     <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="passwordbaruconfirm"
-                    name="passwordbaruconfirm"
-                    type="password"
-                    placeholder="********"
-                    required
-                    >
+                        class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="passwordbaruconfirm"
+                        name="passwordbaruconfirm"
+                        type="password"
+                        placeholder="********"
+                        required>
                 </div>
                 <div class="flex justify-end">
                     <button type="submit" class="text-white bg-[#0074B7] px-4 py-2 rounded-full hover:bg-blue-900">Simpan Perubahan</button>
                 </div>
             </form>
-
-            
         </div>
     </div>
-    <div class="flex flex-col md:flex-row">
-        <div class="w-full md:w-1/5 mb-2 md:mb-0">
-            <label class="text-gray-700 text-sm font-bold block">API</label>
-        </div>
-        <div class="w-full md:w-4/5 md:px-5">
-            <form method="POST" >
-                <div class="flex flex-col mb-5">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="usn">Username</label>
-                    <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="usn"
-                    name="usn"
-                    type="usn"
-                    required
-                    >
-                </div>
-                <div class="flex flex-col mb-5">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="usnpass">Password</label>
-                    <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="usnpass"
-                    name="usnpass"
-                    type="usnpass"
-                    placeholder="********"
-                    required
-                    >
-                </div>
-                <div class="flex flex-col mb-5">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="endpoint">endpoint</label>
-                    <input
-                    class="shadow appearance-none bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="endpoint"
-                    name="endpoint"
-                    type="endpoint"
-                    required
-                    >
-                </div>
-                
-                <div class="flex justify-end">
-                    <button type="submit" class="text-white bg-[#0074B7] px-4 py-2 rounded-full hover:bg-blue-900">hubungkan</button>
-                </div>
-            </form>
-            {% if access_token %}
-            <div style="margin-top: 20px;">
-                <label>Access Token:</label>
-                <input type="text" readonly value="{{ access_token }}" style="width: 100%;" />
-            </div>
-            {% endif %}
-            
-        </div>
-    </div>
-    {% include "modal/modal_flash.html" %}
-    {% include "modal/modal_editnm.html" %}
 </div>
+{% include "modal/modal_flash.html" %}
+{% include "modal/modal_editnm.html" %}
 
 {% endblock %}
-        
-
-
-

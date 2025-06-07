@@ -17,7 +17,7 @@ class Ruang:
         return f"Ruang(nama={self.nama}, tipe_ruang={self.tipe_ruang})"
 
 class Matakuliah:
-    def __init__(self, matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester): #tambah id_perkuliahan
+    def __init__(self, matkul, dosen, sks, kelas, status, id_perkuliahan, id_semester,kategori): #tambah id_perkuliahan
         self.id_perkuliahan = id_perkuliahan
         self.matkul = matkul
         self.dosen = dosen
@@ -25,6 +25,7 @@ class Matakuliah:
         self.status = status
         self.kelas = kelas
         self.id_semester = id_semester
+        self.kategori = kategori
 
     def __repr__(self):
         return (f"Matakuliah(matkul={self.matkul}, dosen={self.dosen}, sks={self.sks}, status={self.status})")
@@ -45,13 +46,17 @@ class PenjadwalanSA:
         self.daftar_hari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']
         
 
-        # Slot waktu
+        # Slot waktu 
         self.durasi_slot = timedelta(minutes=50)
         self.jam_mulai = datetime.strptime("07:00", "%H:%M")
-        self.jam_selesai = datetime.strptime("17:00", "%H:%M")
-        self.slot_istirahat = [(datetime.strptime("12:00", "%H:%M"), datetime.strptime("12:50", "%H:%M"))]
+        self.jam_selesai = datetime.strptime("19:05", "%H:%M")
+        self.slot_istirahat = [
+            (datetime.strptime("09:30", "%H:%M"), datetime.strptime("09:45", "%H:%M")),
+            (datetime.strptime("12:15", "%H:%M"), datetime.strptime("12:45", "%H:%M")),
+            (datetime.strptime("15:15", "%H:%M"), datetime.strptime("15:30", "%H:%M")),            
+            (datetime.strptime("18:00", "%H:%M"), datetime.strptime("18:15", "%H:%M")),
+        ]
         self.daftar_slot = []
-
         # self.setDataCsv()
 
         self.baca_datamk()
@@ -67,6 +72,7 @@ class PenjadwalanSA:
             tb_dosen.nama_dosen AS dosen,
             tb_matakuliah.sks AS sks,
             tb_matakuliah.status AS status,
+            tb_matakuliah.kategori AS kategori,
             id_perkuliahan,
             id_semester
         FROM tb_perkuliahan
@@ -85,7 +91,7 @@ class PenjadwalanSA:
 
         # Iterasi per baris untuk menambahkan data
         for _, row in df_matkul.iterrows():
-            self.tambah_matkul(row['matakuliah'], row['dosen'], row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'])
+            self.tambah_matkul(row['matakuliah'], row['dosen'], row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['kategori'])
             
 
     def baca_dataruang(self):
@@ -115,8 +121,8 @@ class PenjadwalanSA:
         self.daftar_ruang.append(ruang)
         return ruang
     
-    def tambah_matkul(self,matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester):
-        matkul = Matakuliah(matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester) #tambahkan id_perkuliahan
+    def tambah_matkul(self,matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester,kategori):
+        matkul = Matakuliah(matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester,kategori) #tambahkan id_perkuliahan
         self.daftar_matkul.append(matkul)
         return matkul
     
@@ -126,17 +132,41 @@ class PenjadwalanSA:
         return hari
 
     def generate_slot_waktu(self):
-        self.daftar_slot.clear()  # Kosongkan daftar slot sebelum menambahkan baru
+        self.daftar_slot.clear()
         waktu_mulai = self.jam_mulai
-        while waktu_mulai < self.jam_selesai:
-            waktu_berikutnya = waktu_mulai + self.durasi_slot
-            if not any(istirahat[0] <= waktu_mulai < istirahat[1] for istirahat in self.slot_istirahat):
-                self.daftar_slot.append((waktu_mulai.strftime("%H:%M"), waktu_berikutnya.strftime("%H:%M")))
-            waktu_mulai = waktu_berikutnya
 
+        while waktu_mulai + self.durasi_slot <= self.jam_selesai:
+            waktu_selesai = waktu_mulai + self.durasi_slot
 
-    def hitung_sks(self, sks):
-        return 2 if sks == 2 else 4 if sks == 3 else 0
+            konflik_istirahat = False
+            for istirahat_mulai, istirahat_selesai in self.slot_istirahat:
+                if not (waktu_selesai <= istirahat_mulai or waktu_mulai >= istirahat_selesai):
+                    # Slot tumpang tindih dengan istirahat
+                    waktu_mulai = istirahat_selesai  # lanjut setelah istirahat
+                    konflik_istirahat = True
+                    break
+
+            if not konflik_istirahat:
+                self.daftar_slot.append((waktu_mulai.strftime("%H:%M"), waktu_selesai.strftime("%H:%M")))
+                waktu_mulai = waktu_selesai
+
+    def hitung_sks(self, sks, kategori):
+        if kategori == "Teori":
+            return sks 
+        elif kategori == "Praktikum":
+            return sks * 3
+        elif kategori == "Gabungan":
+            return 7 
+        return  0
+    
+    def get_ruang(self,kategori):
+        if kategori == "Teori":
+            return {"Kelas"} 
+        elif kategori == "Praktikum":
+            return {"Lab"} 
+        elif kategori == "Gabungan":
+            return {"Lab"}  
+        return set()
 
     def solusi_awal(self):
         jadwal_awal = []
@@ -145,15 +175,16 @@ class PenjadwalanSA:
         class_schedule = {}  # Menyimpan jadwal kelas yang sudah ada
         
         for matkul in self.daftar_matkul:
-            ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang == matkul.status]
+            tipe_valid = self.get_ruang(matkul.kategori)
+            ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang in tipe_valid]
             if ruang_valid:
                 ruang = random.choice(ruang_valid)
                 hari = random.choice(self.daftar_hari)
                 
                 # Mencari slot waktu yang tidak bertabrakan
                 for _ in range(100): 
-                    waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks))
-                    waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks)
+                    waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori))
+                    waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks,matkul.kategori)
                     waktu = (waktu_mulai, waktu_selesai)
 
                     # Periksa apakah slot ini bentrok untuk kelas yang sama
@@ -217,13 +248,14 @@ class PenjadwalanSA:
         matkul, ruang, hari, waktu = neighbor[idx]
 
         # Pilih ruang dan hari lain secara acak
-        ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang == matkul.status]
+        tipe_valid = self.get_ruang(matkul.kategori)
+        ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang in tipe_valid]
         if ruang_valid:
             ruang = random.choice(ruang_valid)
             hari = random.choice(self.daftar_hari)
             
-            waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks))
-            waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks)
+            waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori))
+            waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks,matkul.kategori)
             waktu = (waktu_mulai, waktu_selesai)
             # Perbarui jadwal
         neighbor[idx] = (matkul, ruang, hari, waktu)
@@ -273,6 +305,7 @@ class PenjadwalanSA:
                     f"Mata Kuliah: {matkul.matkul}, "
                     f"Dosen: {matkul.dosen}, "
                     f"Ruang: {ruang.nama}")
+    
     def tampilkan_slot_waktu(self):
         print("Daftar Slot Waktu:")
         for i, slot in enumerate(self.daftar_slot, 1):
@@ -301,7 +334,7 @@ class PenjadwalanSA:
                 "mata_kuliah": matkul.matkul,
                 "nama_dosen": matkul.dosen,
                 "ruang": ruang.nama,
-                "semester":matkul.id_semester
+                "semester":matkul.id_semester,
             })
 
         df_jadwal = pd.DataFrame(data)

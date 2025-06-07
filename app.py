@@ -1,14 +1,19 @@
 from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response,session,logging
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt, get_jwt_identity,  decode_token
+from flask_cors import CORS
 from routes.auth_api import api
+from routes.sendApi import sendApi
 from config import db_url
 from flask_bcrypt import Bcrypt
 import pandas as pd
 from sqlalchemy import create_engine, text
 from algoritma.optimasiSA import PenjadwalanSA
+import requests
+from datetime import timedelta
 
 
 app = Flask(__name__)
+CORS(app)
 app.register_blueprint(api)
 
 app.secret_key = "kyutpipel"
@@ -17,7 +22,8 @@ app.config["JWT_TOKEN_LOCATION"] = ["cookies","headers"]
 app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
 app.config["JWT_COOKIE_CSRF_PROTECT"] = False #sementara
 app.config["JWT_HEADER_TYPE"] = "Bearer"
-# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
@@ -39,14 +45,14 @@ def expired_token_callback(jwt_header, jwt_payload):
 def unauthorized_response(callback):
     return jsonify({"msg": "Missing or invalid JWT"}), 401
 
-@jwt.invalid_token_loader
-def invalid_token_callback(callback):
-    print("Invalid token error:", callback)
-    return jsonify(msg='Invalid token'), 422
+# @jwt.invalid_token_loader
+# def invalid_token_callback(callback):
+#     print("Invalid token error:", callback)
+#     return jsonify(msg='Invalid token'), 422
 
-@jwt.expired_token_loader
-def expired_token_callback(jwt_header, jwt_payload):
-    return jsonify({"msg": "Token has expired"}), 401
+# @jwt.expired_token_loader
+# def expired_token_callback(jwt_header, jwt_payload):
+#     return jsonify({"msg": "Token has expired"}), 401
 
 
 @app.route("/",methods=["GET", "POST"])
@@ -174,6 +180,32 @@ def data_matakuliah():
         result = connection.execute(text("SELECT * FROM tb_matakuliah"))
         matkul_data = result.mappings().all()
     return render_template("page/data_matakuliah.html", matkuls=matkul_data, active_page='data_matakuliah', nama_user=nama_user,role_user=role_user)
+
+@app.route("/data/prodi")
+@jwt_required()
+def data_prodi():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
+    with db_url.connect() as connection:
+        result = connection.execute(text("SELECT * FROM tb_prodi"))
+        prodi_data = result.mappings().all()
+    return render_template("page/data_prodi.html", prodi=prodi_data, active_page='data_prodi', nama_user=nama_user,role_user=role_user)
+
+@app.route("/data/waktu")
+@jwt_required()
+def data_waktu():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
+    with db_url.connect() as connection:
+        result = connection.execute(text("SELECT * FROM tb_waktu"))
+        waktu_data = result.mappings().all()
+    return render_template("page/data_waktu.html", waktu=waktu_data, active_page='data_waktu', nama_user=nama_user,role_user=role_user)
+
+
 @app.route("/data/perkuliahan")
 @jwt_required()
 def data_perkuliahan():
@@ -468,14 +500,62 @@ def daftar_endpoint():
     nama_user = claims.get("nama")
     role_user = claims.get("role")
     return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint', nama_user=nama_user,role_user=role_user)
-@app.route("/send-data")
+
+@app.route("/get-token", methods=["POST","GET"])
+@jwt_required()
+def get_token():
+    current_user = get_jwt_identity()
+    claims = get_jwt()
+    nama_user = claims.get("nama")
+    role_user = claims.get("role")
+    access_token = None
+    if request.method == 'POST':
+        username = request.form.get('usn')
+        password = request.form.get('usnpass')
+        callback_uri = "http://192.168.145.173:8081/optimasi/login"
+        payload = {
+            "username": username,
+            "password": password
+        }
+        try:
+            res = requests.post(callback_uri, json=payload)
+            if res.status_code == 200:
+                data = res.json()
+                access_token = data.get('access_token')
+
+            else:
+                flash(f"Login gagal: {res.status_code}")
+                print("Status Code:", res.status_code)
+                print("Response Body:", res.text)
+        except Exception as e:
+            flash(f"Gagal menghubungi API: {str(e)}")
+    return render_template('page/get-token.html', access_token=access_token, nama_user=nama_user,role_user=role_user)
+    
+
+@app.route("/send-data", methods=["GET", "POST"])
 @jwt_required()
 def kirim_hasil():
     current_user = get_jwt_identity()
     claims = get_jwt()
     nama_user = claims.get("nama")
     role_user = claims.get("role")
-    return render_template("page/kirim_hasil.html", active_page='send_data', nama_user=nama_user,role_user=role_user)
+    with db_url.connect() as connection:
+        opsi_ids = connection.execute(
+            text("SELECT DISTINCT p.id_generate FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan JOIN tb_generate g ON p.id_generate = g.id_generate WHERE g.status = 'sudah'")
+        ).mappings().all()
+    
+    if request.method == 'POST':
+        selected_id = request.form.get('id_generate')
+        token = request.form.get('sendaccess_token')
+        uri = request.form.get('api_url')
+
+        if selected_id and token:
+            sendApi(selected_id, token, uri)
+            flash("Data berhasil dikirim!", "success")
+        else:
+            flash("ID Generate atau Token tidak valid.", "danger")
+
+    return render_template("page/kirim_hasil.html", active_page='send_data', nama_user=nama_user,role_user=role_user, opsi_ids=opsi_ids)
 
 
 @app.route("/logout")

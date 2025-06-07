@@ -3,14 +3,68 @@
 {% block content %}
 <div class="rounded-lg">
         <div class="bg-gradient-to-r from-[#003b73] to-[#0056b3] rounded-t-lg shadow-lg">
-            <div class="px-8 py-6">
+            <div class="px-4 py-2">
                 <div class="flex items-center justify-center">
-                        <h1 class="text-white items-center text-3xl font-bold mb-2">Kirim Data Perkuliahan</h1>    
+                        <h1 class="text-white items-center text-xl font-bold mb-2">Kirim Data Perkuliahan</h1>    
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto ">
-            hi
+        
+        <div class="overflow-x-auto bg-white p-4">
+            <form method="POST">
+                <div class="flex items-center mb-5 space-x-4">
+                    <label for="id_generate" class="text-gray-700 text-sm font-bold whitespace-nowrap w-1/4">
+                        Pilih ID Generate:
+                    </label>
+                    <select
+                        name="id_generate"
+                        id="id_generate"
+                        class="shadow appearance-none bg-gray-100 rounded-full w-3/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                    >
+                        <option value="">-- Pilih --</option>
+                        {% for item in opsi_ids %}
+                            <option value="{{ item.id_generate }}">{{ item.id_generate }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-center mb-4 space-x-4">
+                    <label for="api_url" class="text-gray-700 text-sm font-bold whitespace-nowrap w-1/4">
+                        URL API:
+                    </label>
+                    <input
+                        type="url"
+                        name="api_url"
+                        id="api_url"
+                        class="shadow appearance-none bg-gray-100 rounded-full w-3/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="https://example.com/api/endpoint"
+                        required
+                    />
+                </div>
+                <div class="flex items-center mb-4 space-x-4">
+                    <label for="sendaccess_token" class="text-gray-700 text-sm font-bold whitespace-nowrap w-1/4">
+                        Access Token:
+                    </label>
+                    <input
+                        type="text"
+                        name="sendaccess_token"
+                        id="sendaccess_token"
+                        class="shadow appearance-none bg-gray-100 rounded-full w-3/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="Masukkan akses token "
+                        required
+                    />
+                </div>
+                <div class="flex justify-end">
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                        Kirim
+                    </button>
+                </div>
+            </form>
+
         </div>      
 </div>
 {% endblock %}
+
