@@ -1,23 +1,31 @@
 
+from sqlalchemy import text
 import requests
 import random
 from datetime import datetime, timedelta
 import time
 import math
-# import psycopg2
+from collections import defaultdict
 import pandas as pd
-from sqlalchemy import create_engine,text
+from config import db_url
 
 class Ruang:
     def __init__(self, nama, tipe_ruang):
         self.nama = nama
         self.tipe_ruang = tipe_ruang
+        self.jadwal = defaultdict(lambda: defaultdict(lambda: None))
     
     def __repr__(self):
         return f"Ruang(nama={self.nama}, tipe_ruang={self.tipe_ruang})"
+class Dosen:
+    def __init__(self, nama):
+        self.nama = nama
+        self.jadwal = defaultdict(lambda: defaultdict(lambda: None))
+    def __repr__(self):
+        return f"Dosen(nama={self.nama})"
 
 class Matakuliah:
-    def __init__(self, matkul, dosen, sks, kelas, status, id_perkuliahan, id_semester,kategori): #tambah id_perkuliahan
+    def __init__(self, matkul, dosen, sks, kelas, status, id_perkuliahan, id_semester,semester,kategori,prodi): #tambah id_perkuliahan
         self.id_perkuliahan = id_perkuliahan
         self.matkul = matkul
         self.dosen = dosen
@@ -25,19 +33,31 @@ class Matakuliah:
         self.status = status
         self.kelas = kelas
         self.id_semester = id_semester
+        self.semester = semester
         self.kategori = kategori
+        self.prodi=prodi
+        self.ruang_needed = self.set_ruang(kategori)
 
     def __repr__(self):
-        return (f"Matakuliah(matkul={self.matkul}, dosen={self.dosen}, sks={self.sks}, status={self.status})")
-
+        return (f"matkul(matkul={self.matkul}, dosen={self.dosen}, sks={self.sks}, status={self.status})")
+    
+    def set_ruang(self, kategori):
+        if kategori == "Teori":
+            return ["Kelas"]
+        elif kategori == "Praktikum":
+            return ["Lab"]
+        elif kategori == "Gabungan":
+            return ["Kelas", "Lab"]
+        else:
+            return []
+        
 class PenjadwalanSA:
     def __init__(self, initial_temperature, cooling_rate, max_iterations, id_generate):
         self.initial_temperature = initial_temperature
         self.cooling_rate = cooling_rate
         self.max_iterations = max_iterations
         self.id_generate = id_generate
-        self.engine = create_engine('mysql+pymysql://root:@localhost/db_optimasi1')
-
+        self.engine = db_url
         
         # Data penjadwalan
         self.daftar_dosen = []
@@ -56,14 +76,11 @@ class PenjadwalanSA:
             (datetime.strptime("15:15", "%H:%M"), datetime.strptime("15:30", "%H:%M")),            
             (datetime.strptime("18:00", "%H:%M"), datetime.strptime("18:15", "%H:%M")),
         ]
-        self.daftar_slot = []
-        # self.setDataCsv()
+        self.daftar_slot = self.generate_slot_waktu()
+        self.prodi_jadwal = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None))))
 
         self.baca_datamk()
         self.baca_dataruang()
-
-        # Generate slot waktu awal
-        self.generate_slot_waktu() 
 
     def baca_datamk(self):
         query = text("""
@@ -74,15 +91,18 @@ class PenjadwalanSA:
             tb_matakuliah.status AS status,
             tb_matakuliah.kategori AS kategori,
             id_perkuliahan,
-            id_semester
+            id_semester,
+            tb_matakuliah.nama_semester AS semester,
+            tb_prodi.nama_prodi AS prodi
         FROM tb_perkuliahan
         JOIN tb_matakuliah ON tb_perkuliahan.kode_matakuliah = tb_matakuliah.kode_matakuliah
         JOIN tb_rombel ON tb_perkuliahan.id_kelasrombel = tb_rombel.id_kelasrombel
         JOIN tb_dosen ON tb_perkuliahan.kode_dosen = tb_dosen.kode_dosen
-        JOIN tb_generate 
-        ON tb_generate.id_generate = tb_rombel.id_generate 
+        JOIN tb_generate ON tb_generate.id_generate = tb_rombel.id_generate 
+        JOIN tb_prodi ON tb_perkuliahan.kode_prodi = tb_prodi.kode_prodi
         AND tb_generate.id_generate = tb_matakuliah.id_generate 
         AND tb_generate.id_generate = tb_dosen.id_generate
+        AND tb_generate.id_generate = tb_prodi.id_generate
         WHERE tb_generate.status = 'belum' 
         AND tb_generate.id_generate = :id_generate
         """)
@@ -91,8 +111,22 @@ class PenjadwalanSA:
 
         # Iterasi per baris untuk menambahkan data
         for _, row in df_matkul.iterrows():
-            self.tambah_matkul(row['matakuliah'], row['dosen'], row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['kategori'])
-            
+            dosen_obj = self.tambah_dosen(row['dosen'])
+            self.tambah_matkul(row['matakuliah'], dosen_obj, row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['semester'],row['kategori'],row['prodi'])
+    
+    def baca_datadosen(self):
+        query = text("""
+            SELECT nama_dosen AS dosen
+            FROM tb_dosen
+            JOIN tb_generate ON tb_dosen.id_generate = tb_generate.id_generate
+            WHERE tb_generate.status = 'belum' 
+            AND tb_generate.id_generate = :id_generate
+        """)
+
+        with self.engine.connect() as connection:
+            df_dosen = pd.read_sql_query(query, connection,params={"id_generate": self.id_generate})
+        for _, row in df_dosen.iterrows():
+            self.tambah_dosen(row['dosen'])
 
     def baca_dataruang(self):
         query = text("""
@@ -112,6 +146,10 @@ class PenjadwalanSA:
             
         
     def tambah_dosen(self, nama):
+        for d in self.daftar_dosen:
+            if d.nama == nama:
+                return d
+        dosen = Dosen(nama)
         dosen = Dosen(nama)
         self.daftar_dosen.append(dosen)
         return dosen
@@ -121,18 +159,13 @@ class PenjadwalanSA:
         self.daftar_ruang.append(ruang)
         return ruang
     
-    def tambah_matkul(self,matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester,kategori):
-        matkul = Matakuliah(matkul, dosen, sks, kelas, status, id_perkuliahan,id_semester,kategori) #tambahkan id_perkuliahan
+    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,prodi,kategori):
+        matkul = Matakuliah(matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,prodi,kategori) #tambahkan id_perkuliahan
         self.daftar_matkul.append(matkul)
         return matkul
-    
-    def tambah_hari(self,hari):
-        hari = Hari(hari)
-        self.daftar_hari.append(hari)
-        return hari
 
     def generate_slot_waktu(self):
-        self.daftar_slot.clear()
+        daftar_slot = []
         waktu_mulai = self.jam_mulai
 
         while waktu_mulai + self.durasi_slot <= self.jam_selesai:
@@ -147,8 +180,9 @@ class PenjadwalanSA:
                     break
 
             if not konflik_istirahat:
-                self.daftar_slot.append((waktu_mulai.strftime("%H:%M"), waktu_selesai.strftime("%H:%M")))
+                daftar_slot.append((waktu_mulai.strftime("%H:%M")))
                 waktu_mulai = waktu_selesai
+        return daftar_slot
 
     def hitung_sks(self, sks, kategori):
         if kategori == "Teori":
@@ -159,178 +193,117 @@ class PenjadwalanSA:
             return 7 
         return  0
     
-    def get_ruang(self,kategori):
-        if kategori == "Teori":
-            return {"Kelas"} 
-        elif kategori == "Praktikum":
-            return {"Lab"} 
-        elif kategori == "Gabungan":
-            return {"Lab"}  
-        return set()
-
-    def solusi_awal(self):
-        jadwal_awal = []
-        self.generate_slot_waktu()
-        
-        class_schedule = {}  # Menyimpan jadwal kelas yang sudah ada
-        
-        for matkul in self.daftar_matkul:
-            tipe_valid = self.get_ruang(matkul.kategori)
-            ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.tipe_ruang in tipe_valid]
-            if ruang_valid:
-                ruang = random.choice(ruang_valid)
-                hari = random.choice(self.daftar_hari)
-                
-                sukses = False
-                for _ in range(1000):  # Dulu 100, sekarang 1000 agar lebih banyak mencoba
-                    waktu_mulai = random.randint(0, len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori))
-                    waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks, matkul.kategori)
-                    waktu = (waktu_mulai, waktu_selesai)
-
-                    class_key = (matkul.kelas, hari)
-                    if class_key not in class_schedule:
-                        class_schedule[class_key] = []
-
-                    conflict = False
-                    for existing_slot in class_schedule[class_key]:
-                        if not (waktu_selesai <= existing_slot[0] or waktu_mulai >= existing_slot[1]):
-                            conflict = True
-                            break
-
-                    if not conflict:
-                        class_schedule[class_key].append(waktu)
-                        jadwal_awal.append((matkul, ruang, hari, waktu))
-                        sukses = True
-                        break
-
-                if not sukses:
-                    # Tandai sebagai gagal dijadwalkan
-                    jadwal_awal.append((matkul, ruang, hari, (-1, -1)))
-        return jadwal_awal
-
-    def evaluate_solution(self, solution):
-        score = 0
-        slot_used = {}
-        class_schedule = {}
-
-        for matkul, ruang, hari, waktu in solution:
-            if waktu == (-1, -1):
-                score += 1000  # Penalti sangat tinggi agar SA memprioritaskan perbaikannya
-                continue
-
-            slot_key = (ruang.nama, hari, waktu)
-            class_key = (matkul.kelas, hari)
-
-            # Cek konflik ruang
-            if slot_key in slot_used:
-                score += 5
-            else:
-                slot_used[slot_key] = True
-
-            # Cek konflik jadwal kelas
-            if class_key not in class_schedule:
-                class_schedule[class_key] = []
-            
-            waktu_mulai, waktu_selesai = waktu
-            conflict = False
-            for existing_start, existing_end in class_schedule[class_key]:
-                if not (waktu_selesai <= existing_start or waktu_mulai >= existing_end):
-                    conflict = True
-                    break
-
-            if conflict:
-                score += 10
-            else:
-                class_schedule[class_key].append((waktu_mulai, waktu_selesai))
-
-        return score
-
-    def get_neighbor(self, solution):
-        neighbor = solution[:]
-
-        # Prioritaskan yang gagal dijadwalkan (waktu == (-1, -1))
-        index_gagal = [i for i, (_, _, _, waktu) in enumerate(neighbor) if waktu == (-1, -1)]
-
-        if index_gagal:
-            idx = random.choice(index_gagal)
-        else:
-            idx = random.randint(0, len(solution) - 1)
-
-        matkul, _, _, _ = neighbor[idx]
-
-        # Cari ruang yang sesuai
-        tipe_valid = self.get_ruang(matkul.kategori)
-        ruang_valid = [r for r in self.daftar_ruang if r.tipe_ruang in tipe_valid]
-        
-        if not ruang_valid:
-            return neighbor  # Tidak ada ruang valid, tidak bisa perbaiki
-
-        ruang = random.choice(ruang_valid)
-        hari = random.choice(self.daftar_hari)
-
-        max_start_index = len(self.daftar_slot) - self.hitung_sks(matkul.sks, matkul.kategori)
-        if max_start_index <= 0:
-            waktu = (-1, -1)
-        else:
-            waktu_mulai = random.randint(0, max_start_index)
-            waktu_selesai = waktu_mulai + self.hitung_sks(matkul.sks, matkul.kategori)
-            waktu = (waktu_mulai, waktu_selesai)
-
-        # Perbarui
-        neighbor[idx] = (matkul, ruang, hari, waktu)
-        return neighbor
+    def jam_sks(self, sks, kategori):
+        total_sks = self.hitung_sks(sks,kategori)
+        if total_sks <= 0:
+            print(f" SKS tidak valid: {sks}, kategori: {kategori}")
+        return math.ceil(total_sks * 50 / self.durasi_slot.total_seconds() * 60)
+    
+    def get_ruang_valid(self,matkul):
+        ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.ruang_needed or any(t in ruang.tipe_ruang for t in matkul.ruang_needed)]
+        return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
 
     def anneal(self):
         current_solution = self.solusi_awal()
-        current_score = self.evaluate_solution(current_solution)
-        best_solution, best_score = current_solution, current_score
+        current_energy = self.calculate_energy(current_solution)
+        best_solution = current_solution
+        best_energy = current_energy
         temperature = self.initial_temperature
 
-        for iteration in range(self.max_iterations):
-            if temperature <= 0:
-                break
-
+        for i in range(self.max_iterations):
             neighbor_solution = self.get_neighbor(current_solution)
-            neighbor_score = self.evaluate_solution(neighbor_solution)
+            neighbor_energy = self.calculate_energy(neighbor_solution)
 
-            delta_score = neighbor_score - current_score
-            acceptance_probability = math.exp(-delta_score / temperature) if delta_score > 0 else 1
+            if self.accept_probability(current_energy, neighbor_energy, temperature) > random.random():
+                current_solution = neighbor_solution
+                current_energy = neighbor_energy
 
-            if random.random() < acceptance_probability:
-                current_solution, current_score = neighbor_solution, neighbor_score
-                if current_score < best_score:
-                    best_solution, best_score = current_solution, current_score
+            if current_energy < best_energy:
+                best_solution = current_solution
+                best_energy = current_energy
 
             temperature *= self.cooling_rate
+            if i % 10000 == 0:
+                print(f"Iterasi {i} | Skor saat ini: {current_energy} | Skor terbaik: {best_energy} | Temperatur: {temperature:.4f}")
 
-        return best_solution, best_score
+        self.apply_solution(best_solution)
+        self.best_solution = best_solution 
 
-    def tampilkan_jadwal(self, solution):
-        jadwal_terjadwal = {}
 
-        for matkul, ruang, hari, waktu in solution:
-            if hari not in jadwal_terjadwal:
-                jadwal_terjadwal[hari] = []
-            jadwal_terjadwal[hari].append((matkul, ruang, waktu))
+    def solusi_awal(self):
+        solution = []
+        for matkul in self.daftar_matkul:
+            ruang = self.get_ruang_valid(matkul)
+            hari = random.choice(self.daftar_hari)
+            durasi = self.jam_sks(matkul.sks, matkul.kategori)
+            max_jam_mulai = len(self.daftar_slot) - durasi
 
-        for hari, jadwal in sorted(jadwal_terjadwal.items()):
-            print(f"\nHari: {hari}")
-            for matkul, ruang, waktu in sorted(jadwal, key=lambda x: x[2][0]):  # Urutkan berdasarkan waktu mulai
-                waktu_mulai = self.daftar_slot[waktu[0]][0]  # Ambil waktu mulai dari daftar slot
-                waktu_selesai = self.daftar_slot[waktu[1] - 1][1]  # Ambil waktu selesai dari daftar slot
-                
-                print(f"  Slot: {waktu_mulai} - {waktu_selesai}, "
-                    f"Kelas: {matkul.kelas}, "
-                    f"Mata Kuliah: {matkul.matkul}, "
-                    f"Dosen: {matkul.dosen}, "
-                    f"Ruang: {ruang.nama}")
+            if max_jam_mulai <= 0:
+                print(f"Matkul {matkul.nama} ({durasi} slot) tidak muat dalam hari (slot tersedia: {len(self.daftar_slot)})")
+                continue  # Skip matkul yang tidak muat
+
+            jam_mulai = random.randint(0, max_jam_mulai)
+            solution.append((matkul, ruang, hari, jam_mulai))
+        return solution
+    
+    def get_neighbor(self, solution):
+        neighbor = solution.copy()
+        index = random.randint(0, len(neighbor) - 1)
+        matkul, _, _, _ = neighbor[index]
+        ruang = self.get_ruang_valid(matkul)
+        hari = random.choice(self.daftar_hari)
+        jam_mulai = random.randint(0, len(self.daftar_slot) - self.jam_sks(matkul.sks,matkul.kategori))
+        neighbor[index] = (matkul, ruang, hari, jam_mulai)
+        return neighbor
+    
+    def calculate_energy(self, solution):
+        conflicts = 0
+        for i, (mk1, r1, h1, j1) in enumerate(solution):
+            slots_needed1 = self.jam_sks(mk1.sks,mk1.kategori)
+            if mk1.ruang_needed and not any(t in r1.tipe_ruang for t in mk1.ruang_needed):
+                conflicts += 10  # Penalti besar untuk matakuliah yang tidak di ruang yang sesuai
+            for mk2, r2, h2, j2 in solution[i+1:]:
+                slots_needed2 = self.jam_sks(mk2.sks,mk2.kategori)
+                if h1 == h2:
+                    if r1 == r2 and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
+                        conflicts += 1
+                    if mk1.dosen == mk2.dosen and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
+                        conflicts += 1
+                    if mk1.prodi == mk2.prodi and mk1.semester == mk2.semester and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
+                        conflicts += 1
+        return conflicts
+    
+    def accept_probability(self, current_energy, neighbor_energy, temperature):
+        if neighbor_energy < current_energy:
+            return 1.0
+        return math.exp((current_energy - neighbor_energy) / temperature)
+    
+    def apply_solution(self, solution):
+        self.reset_jadwal()
+        for matkul, ruang, hari, jam_mulai in solution:
+            slots_needed = self.jam_sks(matkul.sks,matkul.kategori)
+            for i in range(slots_needed):
+                if jam_mulai + i < len(self.daftar_slot):  # pastikan jam_list
+                    ruang.jadwal[hari][jam_mulai + i] = matkul
+                    matkul.dosen.jadwal[hari][jam_mulai + i] = matkul
+                    self.prodi_jadwal[matkul.prodi][matkul.semester][hari][jam_mulai + i] = matkul
+
+    def reset_jadwal(self):
+        for ruang in self.daftar_ruang:
+            ruang.jadwal = defaultdict(lambda: defaultdict(lambda: None))
+        for dosen in self.daftar_dosen:
+            dosen.jadwal = defaultdict(lambda: defaultdict(lambda: None))
+        self.prodi_jadwal = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None))))
+    
+    def generate_jadwal(self):
+        self.anneal()
+        return self.best_solution
     
     def tampilkan_slot_waktu(self):
         print("Daftar Slot Waktu:")
         for i, slot in enumerate(self.daftar_slot, 1):
             print(f"{i}. {slot[0]} - {slot[1]}")
 
-        
     def simpan_optimasi(self, df, table_name='tb_hasil'):
         df.to_sql(table_name, con=self.engine, if_exists='append', index=False)
         print(f'Data berhasil disimpan ke database {table_name}')
@@ -338,31 +311,24 @@ class PenjadwalanSA:
             query = text("UPDATE tb_generate SET status = :status WHERE id_generate = :id_generate")
             conn.execute(query, {"status": "sudah", "id_generate": self.id_generate})
             
-    def df_jadwaloptimasi(self, solution):
-        data = []
-        for matkul, ruang, hari, waktu in solution:
-            waktu_mulai = self.daftar_slot[waktu[0]][0]  # Ambil waktu mulai dari daftar slot
-            waktu_selesai = self.daftar_slot[waktu[1] - 1][1]  # Ambil waktu selesai dari daftar slot
+    def df_hasiljadwal(self, solution):
+        data=[]
+        for matkul, ruang, hari, jam_mulai in solution:
+            butuh_slot = self.jam_sks(matkul.sks, matkul.kategori)
+            jam_selesai = jam_mulai + butuh_slot - 1
+            waktu_mulai = self.daftar_slot[jam_mulai]              
+            waktu_selesai = self.daftar_slot[jam_selesai]          
 
             data.append({
-                "id_perkuliahan" : matkul.id_perkuliahan,
-                "hari": hari,
-                "waktu_mulai": waktu_mulai,
-                "waktu_selesai": waktu_selesai,
-                "kelas": matkul.kelas,
-                "mata_kuliah": matkul.matkul,
-                "nama_dosen": matkul.dosen,
-                "ruang": ruang.nama,
-                "semester":matkul.id_semester,
+                'id_perkuliahan': matkul.id_perkuliahan,
+                'hari': hari,
+                'jam_mulai': waktu_mulai,
+                'jam_selesai': waktu_selesai,
+                'kelas': matkul.kelas,
+                'mata_kuliah': matkul.matkul,
+                'nama_dosen': matkul.dosen.nama,
+                'ruang': ruang.nama if hasattr(ruang, 'nama') else ruang,
+                'semester': matkul.semester
             })
-
-        df_jadwal = pd.DataFrame(data)
-        return df_jadwal
-
-# sa = PenjadwalanSA()
-
-# best_solution, best_score = sa.anneal()
-
-# df_jadwal = sa.df_jadwaloptimasi(best_solution) 
-# print(df_jadwal)
-# sa.simpan_optimasi(df_jadwal)
+        df = pd.DataFrame(data)
+        return df

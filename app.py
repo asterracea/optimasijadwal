@@ -127,8 +127,8 @@ def generate_jadwal():
                 id_generate=id_generate
             )
         
-        best_solution, best_score = sa.anneal()
-        df_jadwal = sa.df_jadwaloptimasi(best_solution)
+        best_solution = sa.generate_jadwal()
+        df_jadwal = sa.df_hasiljadwal(best_solution)
         jadwal_list = df_jadwal.to_dict(orient='records')
         sa.simpan_optimasi(df_jadwal)
 
@@ -403,8 +403,7 @@ def data_hasil():
             text("""
                 SELECT 
                     a.id_hasil AS id1, b.id_hasil AS id2,
-                    a.hari, a.waktu_mulai, a.waktu_selesai,
-                    b.waktu_mulai AS b_mulai, b.waktu_selesai AS b_selesai,
+                    a.hari, a.jam_mulai, a.jam_selesai, b.jam_mulai AS b_mulai, b.jam_selesai AS b_selesai,
                     a.nama_dosen, a.ruang
                 FROM tb_hasil a
                 JOIN tb_hasil b ON a.id_hasil != b.id_hasil
@@ -413,8 +412,8 @@ def data_hasil():
                 WHERE pa.id_generate = :id_generate AND pb.id_generate = :id_generate
                 AND a.hari = b.hari
                 AND (a.nama_dosen = b.nama_dosen OR a.ruang = b.ruang)
-                AND a.waktu_mulai < b.waktu_selesai
-                AND a.waktu_selesai > b.waktu_mulai
+                AND a.jam_mulai < b.jam_selesai
+                AND a.jam_selesai > b.jam_mulai
             """), {"id_generate": selected_id}
         ).mappings().all()
     return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal', nama_user=nama_user,role_user=role_user,bentrok=bentrok)
@@ -510,7 +509,7 @@ def get_token():
     if request.method == 'POST':
         username = request.form.get('usn')
         password = request.form.get('usnpass')
-        callback_uri = "http://192.168.145.173:8081/optimasi/login"
+        callback_uri = "http://192.168.1.78:8081/optimasi/login"
         payload = {
             "username": username,
             "password": password

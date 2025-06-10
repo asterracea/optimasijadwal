@@ -11,7 +11,7 @@
             </button>
 
             <!-- dropdown -->
-            <div id="submenu" class="flex-col lg:ml-8 ml-4 mt-2 space-y-1 {% if active_page in ['data_generate','data_dosen', 'data_matakuliah', 'data_perkuliahan','data_ruang','data_rombel'] %}
+            <div id="submenu" class="flex-col lg:ml-8 ml-4 mt-1 space-y-1 {% if active_page in ['data_generate','data_dosen', 'data_matakuliah', 'data_perkuliahan','data_ruang','data_rombel'] %}
                     block
                 {% else %}
                     hidden
@@ -27,7 +27,7 @@
                     {'name': 'Data Prodi', 'url': '/data/prodi', 'id': 'data_prodi'},
                 ] %}
                 {% for item in data_menu %}
-                <a class="block px-4 py-2 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#003b73] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
+                <a class="block px-1 py-1 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#003b73] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
                     href="{{item.url}}">
                     {{item.name}}
                 </a>
