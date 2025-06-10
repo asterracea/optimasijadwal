@@ -1,250 +1,234 @@
 {% extends 'layout.html' %}
 {% block title %}Generate Jadwal{% endblock %}
 {% block content %}
-    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
-      <!-- Form Header -->
-      <div class="bg-[#003b73] px-5 py-3">
-        <h2 class="text-base font-semibold text-white flex items-center">
-          <i class="fas fa-cogs mr-3"></i>
-          Parameter Optimasi
-        </h2>
-      </div>
-
-      <!-- Form Body -->
-      <div class="p-2">
-        <form action="{{ url_for('generate_jadwal') }}" method="POST" class="space-y-8">
-          
-          <!-- ID Generate Section -->
-          <div class="bg-gray-50 rounded-full p-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <i class="fas fa-database text-blue-500 mr-2"></i>
-              Pilih Data
-            </h3>
-            
-            <div class="space-y-2">
-              <label for="id_generate" class="block text-sm font-medium text-gray-700">
-                ID Generate <span class="text-red-500">*</span>
-              </label>
-              <select class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                      id="id_generate" 
-                      name="id_generate" 
-                      required>
-                <option value="">Pilih ID Generate dari data yang akan dioptimasi</option>
-                {% for id in generates %}
-                  <option value="{{ id.id_generate }}">{{ id.id_generate }}</option>
-                {% else %}
-                  <option value="">Tidak ada ID tersedia</option>
-                {% endfor %}
-              </select>
-              <p class="text-xs text-gray-500 mt-1">Pilih dataset yang akan digunakan untuk optimasi jadwal</p>
-            </div>
-          </div>
-
-          <!-- Algorithm Parameters Section -->
-          <div class="bg-gray-50 rounded-xl p-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <i class="fas fa-sliders-h text-green-500 mr-2"></i>
-              Parameter Algoritma
-            </h3>
-            
-            <div class="grid md:grid-cols-3 gap-6">
-              <!-- Alpha Parameter -->
-              <div class="space-y-2">
-                <label for="alpha" class="block text-sm font-medium text-gray-700">
-                  Alpha (α) <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                  <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                         type="number" 
-                         id="alpha" 
-                         name="alpha"
-                         step="0.00001"
-                         min="0.1"
-                         max="0.99999"
-                         placeholder="0.95"
-                         required>
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <i class="fas fa-percentage text-gray-400 text-sm"></i>
-                  </div>
-                </div>
-                <div class="bg-blue-50 p-2 rounded text-xs text-blue-700">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  Rentang: 0.1 - 0.99999<br>
-                  <strong>Rekomendasi: </strong><br>
-                  <strong> 0.95 (Jika data kecil)</strong><br>
-                  <strong> 0.95 (Jika data besar)</strong>
-                </div>
-              </div>
-
-              <!-- Initial Temperature -->
-              <div class="space-y-2">
-                <label for="suhuawal" class="block text-sm font-medium text-gray-700">
-                  Suhu Awal <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                  <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                         type="number" 
-                         id="suhuawal" 
-                         name="suhuawal" 
-                         min="1"
-                         placeholder="500"
-                         required>
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <i class="fas fa-thermometer-half text-gray-400 text-sm"></i>
-                  </div>
-                </div>
-                <div class="bg-orange-50 p-2 rounded text-xs text-orange-700">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  Nilai positif<br>
-                  <strong>Rekomendasi:</strong><br>
-                  <strong> 100-1000 (Jika data kecil)</strong><br>
-                  <strong> 10000 (Jika data besar)</strong>
-
-                </div>
-              </div>
-
-              <!-- Max Iterations -->
-              <div class="space-y-2">
-                <label for="maxt" class="block text-sm font-medium text-gray-700">
-                  Max Iterasi <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                  <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                         type="number" 
-                         id="maxt" 
-                         name="maxt" 
-                         min="1"
-                         placeholder="5000"
-                         required>
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <i class="fas fa-redo text-gray-400 text-sm"></i>
-                  </div>
-                </div>
-                <div class="bg-purple-50 p-2 rounded text-xs text-purple-700">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  Bilangan bulat positif<br>
-                  <strong>Rekomendasi: 1000-10000</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div  class="flex  flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
-            
-            <button type="reset" 
-                    class="flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl  focus:outline-none focus:ring-4 focus:ring-yellow-300">
-              <i class="fas fa-undo mr-2"></i>
-              Reset
-            </button>
-            <button type="submit" 
-                    class="flex-1 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl  focus:outline-none focus:ring-4 focus:ring-green-300">
-              <i class="fas fa-play mr-2"></i>
-              Generate Jadwal
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Results Section -->
-    {% if data %}
-    <div class="bg-white shadow-xl rounded-2xl overflow-hidden mt-8">
-      <!-- Results Header -->
-      <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6">
-        <h2 class="text-xl font-semibold text-white flex items-center">
-          <i class="fas fa-calendar-check mr-3"></i>
-          Hasil Jadwal Kuliah
-        </h2>
-      </div>
-
-      <!-- Results Table -->
-      <div class="p-8">
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-            <thead>
-              <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-calendar-day mr-2 text-blue-500"></i>Hari
-                </th>
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-clock mr-2 text-green-500"></i>Waktu
-                </th>
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-users mr-2 text-purple-500"></i>Kelas
-                </th>
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-book mr-2 text-red-500"></i>Mata Kuliah
-                </th>
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-user-tie mr-2 text-indigo-500"></i>Dosen
-                </th>
-                <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <i class="fas fa-door-open mr-2 text-orange-500"></i>Ruang
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              {% for row in data %}
-              <tr class="hover:bg-gray-50 transition-colors duration-150">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ row.hari }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {{ row.jam_mulai }}  
-                  </span>
-                  -
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {{ row.jam_selesai }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {{ row.kelas }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-900 font-medium">
-                  {{ row.mata_kuliah }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {{ row.nama_dosen }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                    {{ row.ruang }}
-                  </span>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-    <div id="loading-icon" class="hidden fixed inset-0 bg-gray-500/75 transition-opacity z-50 flex items-center justify-center">
-        
-        <div class="absolute right-1/2 bottom-1/2 transform translate-x-1/2 translate-y-1/2">
-         <div class="w-24 h-24 border-[10px] border-t-transparent border-r-blue-500 border-b-purple-500 border-l-green-500 rounded-full animate-spin"></div>
-        </div>
-    </div>
-
-    <!-- Modal Flash Messages -->
-    {% include "modal/modal_flash.html" %}
+<div class="bg-white shadow-xl rounded-2xl overflow-hidden mb-5">
+  <div class="bg-[#003b73] px-5 py-3">
+    <h2 class="text-xl font-semibold text-white flex items-center">
+      <i class="fas fa-cogs mr-3"></i>
+      Parameter Optimasi
+    </h2>
   </div>
-  <script>
-    const form = document.querySelector("form");
-    const spinner = document.getElementById("loading-icon");
-    const submitBtn = document.getElementById("submit-btn");
-    form.addEventListener("submit", () => {
-        // Tampilkan spinner
-        spinner.classList.remove("hidden");
-        // Nonaktifkan tombol submit agar tidak dobel klik
-        submitBtn.disabled = true;
-        submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-  });
-  </script>
+
+  <!-- Form Body -->
+  <div class="p-2">
+    <form action="{{ url_for('generate_jadwal') }}" method="POST" class="space-y-4">
+      <!-- ID Generate Section -->
+      <div class="bg-gray-50 rounded-full p-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-database text-blue-500 mr-2"></i>
+          Pilih Data
+        </h3>
+        
+        <div class="space-y-2">
+          <label for="id_generate" class="block text-sm font-medium text-gray-700">
+            ID Generate <span class="text-red-500">*</span>
+          </label>
+          <select class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
+                  id="id_generate" 
+                  name="id_generate" 
+                  required>
+            <option value="">Pilih ID Generate dari data yang akan dioptimasi</option>
+            {% for id in generates %}
+              <option value="{{ id.id_generate }}">{{ id.id_generate }}</option>
+            {% else %}
+              <option value="">Tidak ada ID tersedia</option>
+            {% endfor %}
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Pilih dataset yang akan digunakan untuk optimasi jadwal</p>
+        </div>
+      </div>
+
+      <!-- Algorithm Parameters Section -->
+      <div class="bg-gray-50 rounded-xl p-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-sliders-h text-green-500 mr-2"></i>
+          Parameter Algoritma
+        </h3>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- Alpha Parameter -->
+          <div class="space-y-2">
+            <label for="alpha" class="block text-sm font-medium text-gray-700">
+              Alpha (α) <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      type="number" 
+                      id="alpha" 
+                      name="alpha"
+                      step="0.00001"
+                      min="0.1"
+                      max="0.99999"
+                      placeholder="0.95"
+                      required>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="fas fa-percentage text-gray-400 text-sm"></i>
+              </div>
+            </div>
+            <div class="bg-blue-50 p-2 rounded text-xs text-blue-700">
+              <i class="fas fa-info-circle mr-1"></i>
+              Rentang: 0.1 - 0.99999<br>
+            </div>
+          </div>
+          <!-- suhu -->
+          <div class="space-y-2">
+            <label for="suhuawal" class="block text-sm font-medium text-gray-700">
+              Suhu Awal <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      type="number" 
+                      id="suhuawal" 
+                      name="suhuawal" 
+                      min="1"
+                      placeholder="500"
+                      required>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="fas fa-thermometer-half text-gray-400 text-sm"></i>
+              </div>
+            </div>
+            <div class="bg-orange-50 p-2 rounded text-xs text-orange-700">
+              <i class="fas fa-info-circle mr-1"></i>
+              Nilai positif<br>
+            </div>
+          </div>
+
+          <!-- maxt -->
+          <div class="space-y-2">
+            <label for="maxt" class="block text-sm font-medium text-gray-700">
+              Max Iterasi <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      type="number" 
+                      id="maxt" 
+                      name="maxt" 
+                      min="1"
+                      placeholder="5000"
+                      required>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="fas fa-redo text-gray-400 text-sm"></i>
+              </div>
+            </div>
+            <div class="bg-purple-50 p-2 rounded text-xs text-purple-700">
+              <i class="fas fa-info-circle mr-1"></i>
+              Bilangan bulat positif<br>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Button -->
+      <div class="flex justify-end sm:flex-row gap-4 pt-6 border-t border-gray-200">
+        <button 
+          type="reset" 
+          class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300">
+          <i class="fas fa-undo mr-2"></i>
+          Reset
+        </button>
+        <button 
+          type="submit" 
+          class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-300">
+          <i class="fas fa-play mr-2"></i>
+          Generate Jadwal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Results Section -->
+{% if data %}
+<div class="bg-white shadow-xl rounded-2xl overflow-hidden mt-8">
+  <!-- Results Header -->
+  <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6">
+    <h2 class="text-xl font-semibold text-white flex items-center">
+      <i class="fas fa-calendar-check mr-3"></i>
+      Hasil Jadwal Kuliah
+    </h2>
+  </div>
+
+  <!-- Results Table -->
+  <div class="p-8">
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+        <thead>
+          {% set thead = [
+              {'name': 'Hari'},
+              {'name': 'Waktu'},
+              {'name': 'Kelas'},
+              {'name': 'Matakuliah'},
+              {'name': 'Dosen'},
+              {'name': 'Ruang'},
+          ] %}
+          <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+            {% for item in thead %}
+            <th class="border-b-2 border-gray-200 px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+              {{item.name}}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for row in data %}
+          <tr class="hover:bg-gray-50 transition-colors duration-150">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {{ row.hari }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {{ row.jam_mulai }}  
+              </span>
+              -
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {{ row.jam_selesai }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                {{ row.kelas }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+              {{ row.mata_kuliah }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ row.nama_dosen }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                {{ row.ruang }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div id="loading-icon" class="hidden fixed inset-0 bg-gray-500/75 transition-opacity z-50 flex items-center justify-center">
+    <div class="absolute right-1/2 bottom-1/2 transform translate-x-1/2 translate-y-1/2">
+      <div class="w-24 h-24 border-[10px] border-t-transparent border-r-blue-500 border-b-purple-500 border-l-green-500 rounded-full animate-spin"></div>
+    </div>
+</div>
+
+<!-- Modal Flash Messages -->
+{% include "modal/modal_flash.html" %}
+</div>
+<script>
+const form = document.querySelector("form");
+const spinner = document.getElementById("loading-icon");
+const submitBtn = document.getElementById("submit-btn");
+form.addEventListener("submit", () => {
+    // Tampilkan spinner
+    spinner.classList.remove("hidden");
+    // Nonaktifkan tombol submit agar tidak dobel klik
+    submitBtn.disabled = true;
+    submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+});
+</script>
 
 {% endblock %}
 <!-- {% block script %}  
