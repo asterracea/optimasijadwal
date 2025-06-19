@@ -1,12 +1,22 @@
 {% extends 'layout.html' %}
-{% block title %} data rombongan belajar {% endblock %}
+{% block title %} data pengguna {% endblock %}
 {% block content %}
-<body class="antialiased font-sans bg-gray-200 shadow-lg">
-    <div class="container mx-auto px-4 sm:px-8">
-        <div class="py-8">
-            <div>
-                <h2 class="text-2xl font-semibold leading-tight">Users</h2>
+
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <div class="bg-[#003b73] px-8 py-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-user mr-3"></i>
+                    Daftar Pengguna
+                </h2>
+                <div class="text-white text-sm">
+                    <i class="fas fa-database mr-2"></i>
+                    Total: {{ users|length if users else 0 }} akun
+                </div>
             </div>
+        </div>
+        <div class="py-8">
+            
             <div class="my-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div class="flex flex-row space-x-2">
                     <!-- Dropdown jumlah data -->
@@ -63,10 +73,10 @@
                     </a> -->
                 </div>
             </div>
-<!--  -->
+
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
                 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
-                    <table class="min-w-full leading-normal">
+                    <table class="min-w-full leading-normal p-2">
                         <thead class="bg-gray-50">
                             {% set thead = [
                                 {'name': 'Nama'},
@@ -159,5 +169,5 @@
     
 
     </script>
-</body>
+
 {% endblock %}

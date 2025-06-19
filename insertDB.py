@@ -28,7 +28,7 @@ def simpanData(json_data, id_user):
         df_semester = df_setjadwal[['id_semester', 'nama_semester']].drop_duplicates()
         df_rombel = df_setjadwal[['id_kelasrombel', 'nama_kelas']].drop_duplicates()
         df_prodi = df_setjadwal[['kode_prodi','nama_prodi']].drop_duplicates()
-        df_matkul = df_setjadwal[['kode_matakuliah', 'nama_matakuliah', 'sks', 'status', 'nama_semester','kategori']].drop_duplicates()
+        df_matkul = df_setjadwal[['kode_matakuliah', 'nama_matakuliah', 'sks', 'status', 'nama_semester','kategori','kode_pasangan']].drop_duplicates()
         df_ruang = df_setruang[['kode_ruang', 'nama_ruangan', 'status_ruangan']].drop_duplicates()
         df_waktu = df_setwaktu[['id_waktu','jam_mulai','jam_selesai','nama_hari']].drop_duplicates()
 

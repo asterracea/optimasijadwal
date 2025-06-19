@@ -5,34 +5,35 @@
         </div>
         <div class="relative group">                    
             <button onclick="toggleSubmenu()" class="flex items-center justify-center lg:justify-start w-full rounded-md h-12 px-4 font-semibold text-gray-500 hover:text-blue-500 focus:outline-none">
-                <i class="fas fa-database mr-2 text-[#003b73]"></i>
+                <i class="fas fa-folder-open mr-2 text-[#003b73]"></i>
                 <span class="hidden lg:block text-[#003b73]">Data</span>
                 <i class="fas fa-chevron-down ml-1 md:ml-auto hidden lg:block"></i>
             </button>
 
             <!-- dropdown -->
-            <div id="submenu" class="flex-col lg:ml-8 ml-4 mt-1 space-y-1 {% if active_page in ['data_generate','data_dosen', 'data_matakuliah', 'data_perkuliahan','data_ruang','data_rombel','data_prodi','data_waktu'] %}
+            <div id="submenu" class="flex-col lg:ml-8 ml-4 mt-1 space-y-1 
+                {% if active_page in ['data_generate','data_master'] %}
                     block
                 {% else %}
                     hidden
                 {% endif %}">
+                
                 {% set data_menu = [
-                    {'name': 'Data Generate', 'url': '/data/generate', 'id': 'data_generate'},
-                    {'name': 'Data Dosen', 'url': '/data/dosen', 'id': 'data_dosen'},
-                    {'name': 'Data Matakuliah', 'url': '/data/matakuliah', 'id': 'data_matakuliah'},
-                    {'name': 'Data Perkuliahan', 'url': '/data/perkuliahan', 'id': 'data_perkuliahan'},
-                    {'name': 'Data Ruang', 'url': '/data/ruang', 'id': 'data_ruang'},
-                    {'name': 'Data Rombongan Belajar', 'url': '/data/rombel', 'id': 'data_rombel'},
-                    {'name': 'Data Waktu', 'url': '/data/waktu', 'id': 'data_waktu'},
-                    {'name': 'Data Prodi', 'url': '/data/prodi', 'id': 'data_prodi'},
+                    {'name': 'Data Generate', 'icon': 'fa-gear', 'url': '/data/generate', 'id': 'data_generate'},
+                    {'name': 'Master data',  'icon': 'fa-database', 'url': '/data/master', 'id': 'data_master'},
                 ] %}
+
                 {% for item in data_menu %}
-                <a class="block px-1 py-1 text-[#003b73] hover:bg-gray-100 rounded {% if active_page == item.id %} bg-[#003b73] text-white {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}"
-                    href="{{item.url}}">
-                    {{item.name}}
+                <a href="{{ item.url }}"
+                class="flex items-center px-3 py-2 rounded transition-colors duration-200 
+                {% if active_page == item.id %} bg-[#003b73] text-white 
+                {% else %} text-[#003b73] hover:bg-gray-100 {% endif %}">
+                    <i class="fas {{ item.icon }} mr-2"></i>
+                    <span>{{ item.name }}</span>
                 </a>
                 {% endfor %}
             </div>
+
         </div> 
         {% set main_menu = [
             {'name': 'Generate Jadwal', 'icon': 'fa-home', 'url': '/dashboard', 'id': 'dashboard'},
@@ -40,7 +41,7 @@
             {'name': 'User', 'icon': 'fa-user', 'url': '/user/datauser', 'id': 'data_user'},        
             {'name': 'Pengaturan', 'icon': 'fa-gear', 'url': '/settings', 'id': 'pengaturan'},
             {'name': 'Endpoint API', 'icon': 'fa-code', 'url': '/daftar-endpoint', 'id': 'daftar_endpoint'},
-            {'name': 'Get token', 'icon': 'fa-code', 'url': '/get-token', 'id': 'get_token'},
+            {'name': 'Get token', 'icon': 'fa-key', 'url': '/get-token', 'id': 'get_token'},
             {'name': 'Send', 'icon': 'fa-paper-plane', 'url': '/send-data', 'id': 'send_data'},
         ] %}
         {% for item in main_menu %}

@@ -41,10 +41,22 @@ def invalid_token_callback(callback):
 def expired_token_callback(jwt_header, jwt_payload):
     flash("Sesi Anda telah habis. Silakan login ulang.", "warning")
     return redirect(url_for('login'))
+from functools import wraps
+from flask import abort
 
-
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        claims = get_jwt()
+        if claims.get("role") != "admin":
+            flash("Akses ditolak. Hanya admin yang dapat mengakses halaman ini.", "danger")
+            return redirect(url_for("unauthorized"))  # Atau halaman lain yang sesuai
+        return fn(*args, **kwargs)
+    return wrapper
+@app.route("/error")
+def unauthorized():
+    return render_template("page/error.html")
 @app.route("/",methods=["GET", "POST"])
-
 @app.route("/login", methods=["GET","POST"])
 def login():
     token = request.cookies.get("access_token")
@@ -96,6 +108,7 @@ def login():
 
 @app.route("/dashboard")
 @jwt_required()
+@admin_required
 def dashboard():
     current_user = get_jwt_identity()
     claims = get_jwt()
@@ -136,75 +149,59 @@ def generate_jadwal():
         # flash('Jadwal berhasil digenerate!', 'success')
         return render_template('page/dashboard.html', data=jadwal_list, nama_user=nama_user,role_user=role_user)
     return redirect(url_for('dashboard'))
-
    
-@app.route('/callback', methods=['POST'])
-def optimasi_callback():
-    data = request.get_json()
-    return jsonify({"status": "received", "data": data})
-    
-
-@app.route("/data/dosen")
+@app.route("/data/master", methods=['GET', 'POST'])
 @jwt_required()
-def data_dosen():
+def data_master():
     current_user = get_jwt_identity()
     claims = get_jwt()
     nama_user = claims.get("nama")
     role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_dosen"))
-        dosen_data = result.mappings().all()
-    return render_template("page/data_dosen.html", dosens=dosen_data, active_page='data_dosen', nama_user=nama_user,role_user=role_user)
 
-    
-@app.route("/data/matakuliah")
-@jwt_required()
-def data_matakuliah():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_matakuliah"))
-        matkul_data = result.mappings().all()
-    return render_template("page/data_matakuliah.html", matkuls=matkul_data, active_page='data_matakuliah', nama_user=nama_user,role_user=role_user)
+    selected_id = None
+    if request.method == "POST":
+        selected_id = request.form.get("id_generate")
 
-@app.route("/data/prodi")
-@jwt_required()
-def data_prodi():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
     with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_prodi"))
-        prodi_data = result.mappings().all()
-    return render_template("page/data_prodi.html", prodi=prodi_data, active_page='data_prodi', nama_user=nama_user,role_user=role_user)
+        generate_ids = connection.execute(
+            text("SELECT id_generate FROM tb_generate")
+        ).mappings().all()
 
-@app.route("/data/waktu")
-@jwt_required()
-def data_waktu():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_waktu"))
-        waktu_data = result.mappings().all()
-    return render_template("page/data_waktu.html", waktu=waktu_data, active_page='data_waktu', nama_user=nama_user,role_user=role_user)
+    dosen_data, matkul_data, perkuliahan_data, ruang_data, rombel_data, prodi_data, waktu_data = [], [], [], [], [], [], []
+    if selected_id:
+        with db_url.connect() as connection:
+            dosen = connection.execute(text("SELECT * FROM tb_dosen WHERE id_generate = :id"), {"id": selected_id})
+            mk = connection.execute(text("SELECT * FROM tb_matakuliah WHERE id_generate = :id"), {"id": selected_id})
+            pk = connection.execute(text("SELECT * FROM tb_perkuliahan WHERE id_generate = :id"), {"id": selected_id})
+            ruang = connection.execute(text("SELECT * FROM tb_ruang WHERE id_generate = :id"), {"id": selected_id})
+            rb = connection.execute(text("SELECT * FROM tb_rombel WHERE id_generate = :id"), {"id": selected_id})
+            ps = connection.execute(text("SELECT * FROM tb_prodi WHERE id_generate = :id"), {"id": selected_id})
+            time = connection.execute(text("SELECT * FROM tb_waktu WHERE id_generate = :id"), {"id": selected_id})
+
+            dosen_data = dosen.mappings().all()
+            matkul_data = mk.mappings().all()
+            perkuliahan_data = pk.mappings().all()
+            ruang_data = ruang.mappings().all()
+            rombel_data = rb.mappings().all()
+            prodi_data = ps.mappings().all()
+            waktu_data = time.mappings().all()
+
+    return render_template("page/tabdata.html",
+                           active_page='data_master',
+                           generate_ids=generate_ids,
+                           selected_id=selected_id,
+                           dosens=dosen_data,
+                           matkuls=matkul_data,
+                           perkuliahans=perkuliahan_data,
+                           ruangs=ruang_data,
+                           rombels=rombel_data,
+                           prodis=prodi_data,
+                           waktu=waktu_data,
+                           nama_user=nama_user,
+                           role_user=role_user)
 
 
-@app.route("/data/perkuliahan")
-@jwt_required()
-def data_perkuliahan():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_perkuliahan"))
-        perkuliahan_data = result.mappings().all()
-    return render_template("page/data_perkuliahan.html",perkuliahans=perkuliahan_data, active_page='data_perkuliahan', nama_user=nama_user,role_user=role_user)
+
 @app.route("/data/generate")
 @jwt_required()
 def data_generate():
@@ -234,28 +231,6 @@ def delete_generate(id_generate):
     except Exception as e:
         flash(f"Terjadi kesalahan koneksi: {e}", "error")
     return redirect(url_for("data_generate"))
-@app.route("/data/ruang")
-@jwt_required()
-def data_ruang():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_ruang"))
-        ruang_data = result.mappings().all()
-    return render_template("page/data_ruang.html",ruangs=ruang_data, active_page='data_ruang', nama_user=nama_user,role_user=role_user)
-@app.route("/data/rombel")
-@jwt_required()
-def data_rombel():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        result = connection.execute(text("SELECT * FROM tb_rombel"))
-        rombel_data = result.mappings().all()
-    return render_template("page/data_rombel.html",rombels=rombel_data, active_page='data_rombel', nama_user=nama_user,role_user=role_user)
 
 @app.route("/user/datauser", methods=["GET", "POST"])
 @jwt_required()
@@ -509,7 +484,7 @@ def get_token():
     if request.method == 'POST':
         username = request.form.get('usn')
         password = request.form.get('usnpass')
-        callback_uri = "http://192.168.1.78:8081/optimasi/login"
+        callback_uri = "http://192.168.170.173:8081/optimasi/login"
         payload = {
             "username": username,
             "password": password

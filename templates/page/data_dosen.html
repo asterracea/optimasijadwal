@@ -1,77 +1,93 @@
-{% extends 'layout.html' %}
-{% block title %} Data Dosen {% endblock %}
 
-{% block content %}
-    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
-        <!-- Results Header -->
-        <div class="bg-[#003b73] px-8 py-6">
-            <h2 class="text-xl font-semibold text-white flex items-center">
-            <i class="fas fa-calendar-check mr-3"></i>
-            Hasil Jadwal Kuliah
-            </h2>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-                    <thead>
-                        {% set thead = [
-                            {'name': 'No'},
-                            {'name': 'NIP/NIDN'},
-                            {'name': 'ID Generate'},
-                            {'name': 'Nama Dosen'},
-                            {'name': 'Status'},
-                            
-                        ] %}
-                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
-                            {% for item in thead %}
-                            <th class="border-b-2 border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                                <span class="inline-flex items-center space-x-2">
-                                    {{ item.name }}
-                                </span>
-                            </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-gray-200">
-                    {% if dosens|length > 0 %}
-                        {% for dosen in dosens %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ loop.index }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium text-gray-500">
-                                    {{ dosen.nipnidn }}
-                                </span>
-                            </td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium text-gray-500">
-                                    {{ dosen.id_generate }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium text-gray-500">
-                                    {{ dosen.nama_dosen }}
-                                </span>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium text-gray-500">
-                                    {{ dosen.status }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="px-6 py-4 text-center text-red-500">
-                            Data tidak tersedia!
-                            </td>
-                        </tr>
-                    {% endif %}
-                    </tbody>
-                </table>
+<div class="bg-white shadow-xl overflow-hidden">
+    <div class="bg-[#003b73] px-8 py-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-md font-semibold text-white flex items-center">
+                    <i class="fas fa-book mr-3"></i>
+                    Daftar Dosen
+                </h2>
+                <div class="text-white text-sm">
+                    <i class="fas fa-database mr-2"></i>
+                    Total: {{ dosens|length if dosens else 0 }} dosen
+                </div>
             </div>
         </div>
-{% endblock %}
+
+    <div class="p-2">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+                <thead>
+                    {% set thdosen = [
+                        {'name': 'No'},
+                        {'name': 'ID Generate'},
+                        {'name': 'Nama Dosen'},
+                        {'name': 'Status'},
+                    ] %}
+                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                        {% for item in thdosen %}
+                        <th class="border-b-2 border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                            <span class="inline-flex items-center space-x-2">
+                                {{ item.name }}
+                            </span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-200">
+                {% if dosens|length > 0 %}
+                    {% for dosen in dosens %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ loop.index }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium text-gray-500">
+                                {{ dosen.id_generate }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-orange-200 transition-colors">
+                                    <i class="fas fa-user-tie text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                                        {{ dosen.nama_dosen }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">{{dosen.nipnidn}}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div>
+                                    {% if dosen.status == 'aktif' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 group-hover:bg-green-200 transition-colors">
+                                            {{ dosen.status }}
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 group-hover:bg-red-200 transition-colors">
+                                            {{ dosen.status }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-red-500">
+                        Data tidak tersedia!
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
     

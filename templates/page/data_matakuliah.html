@@ -1,136 +1,135 @@
-{% extends 'layout.html' %}
-{% block title %}Data Matakuliah {% endblock %}
-{% block content %}
-    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
-        
-            <div class="bg-[#003b73] px-8 py-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-semibold text-white flex items-center">
-                        <i class="fas fa-book mr-3"></i>
-                        Daftar Mata Kuliah
-                    </h2>
-                    <div class="text-white text-sm">
-                        <i class="fas fa-database mr-2"></i>
-                        Total: {{ matkuls|length if matkuls else 0 }} mata kuliah
-                    </div>
+<div class="bg-white shadow-xl overflow-hidden">
+    
+        <div class="bg-[#003b73] px-8 py-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <i class="fas fa-book mr-3"></i>
+                    Daftar Mata Kuliah
+                </h2>
+                <div class="text-white text-sm">
+                    <i class="fas fa-database mr-2"></i>
+                    Total: {{ matkuls|length if matkuls else 0 }} mata kuliah
                 </div>
             </div>
+        </div>
 
-            <!-- Table Content -->
-            <div class="p-6">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            {% set thead = [
-                                {'name': 'No'},
-                                {'name': 'Mata Kuliah'},
-                                {'name': 'Semester'},
-                                {'name': 'Status'},
-                            ] %}
-                            <tr class="border-b-2 border-gray-100">
-                                {% for item in thead %}
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="{{ item.icon }} {{ item.color }}"></i>
-                                        <span>{{ item.name }}</span>
-                                    </div>
-                                </th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        
-                        <tbody class="divide-y divide-gray-100">
-                        {% if matkuls|length > 0 %}
-                            {% for matkul in matkuls %}
-                                <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group">
-                                    <!-- No -->
-                                    <td class="px-6 py-3 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 font-semibold text-sm">
-                                                {{ loop.index }}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Mata Kuliah -->
-                                    <td class="px-6 py-3">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
-                                                <i class="fas fa-book text-green-600"></i>
-                                            </div>
-                                            <div>
-                                                <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                                                    {{ matkul.nama_matakuliah }}
-                                                </div>
-                                                <div class="text-xs text-gray-500">{{matkul.sks}} sks</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Semester -->
-                                    <td class="px-6 py-3 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div>
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-gray-900">
-                                                    {{ matkul.nama_semester }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <!-- Status -->
-                                    <td class="px-6 py-3 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div>
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
-                                                    {{ matkul.status }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
+        <!-- Table Content -->
+        <div class="p-2">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        {% set thmatkul = [
+                            {'name': 'No'},
+                            {'name': 'ID Generate'},
+                            {'name': 'Mata Kuliah'},
+                            {'name': 'Semester'},
+                            {'name': 'Status'},
+                        ] %}
+                        <tr class="border-b-2 border-gray-100">
+                            {% for item in thmatkul %}
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center space-x-2">
+                                    <span>{{ item.name }}</span>
+                                </div>
+                            </th>
                             {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="5" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center space-y-4">
-                                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                        </tr>
+                    </thead>
+                    
+                    <tbody class="divide-y divide-gray-100">
+                    {% if matkuls|length > 0 %}
+                        {% for matkul in matkuls %}
+                            <tr class="hover:bg-blue-100 transition-all duration-200 group">
+                                <!-- No -->
+                                <td class="px-6 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-gray-600 font-semibold text-sm">
+                                            {{ loop.index }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                                                {{ matkul.id_generate }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- Mata Kuliah -->
+                                <td class="px-6 py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
+                                            <i class="fas fa-book text-green-600"></i>
                                         </div>
                                         <div>
-                                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Data Tidak Tersedia</h3>
-                                            <p class="text-gray-500">Belum ada data mata kuliah yang tersimpan dalam sistem.</p>
+                                            <div class="text-sm font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                                                {{ matkul.nama_matakuliah }}
+                                            </div>
+                                            <div class="text-xs text-gray-500">{{matkul.sks}} sks</div>
                                         </div>
-                                        <button class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                            <i class="fas fa-plus mr-2"></i>
-                                            Tambah Data
-                                        </button>
+                                    </div>
+                                </td>
+                                
+                                <!-- Semester -->
+                                <td class="px-6 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-gray-900">
+                                                {{ matkul.nama_semester }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-gray-900">
+                                                {{ matkul.kode_pasangan }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- Status -->
+                                <td class="px-6 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                                                {{ matkul.status }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
-                        {% endif %}
-                        </tbody>
-                    </table>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-red-500">
+                        Data tidak tersedia!
+                        </td>
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if matkuls|length > 0 %}
+        <div class="bg-gray-50 px-8 py-3 border-t border-gray-200">
+            <div class="flex items-center justify-between text-sm text-gray-600">
+                <div class="flex items-center space-x-4">
+                    <span class="flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                        Menampilkan {{ matkuls|length }} dari {{ matkuls|length }} mata kuliah
+                    </span>
                 </div>
             </div>
+        </div>
+        {% endif %}
+    
 
-            {% if matkuls|length > 0 %}
-            <div class="bg-gray-50 px-8 py-3 border-t border-gray-200">
-                <div class="flex items-center justify-between text-sm text-gray-600">
-                    <div class="flex items-center space-x-4">
-                        <span class="flex items-center">
-                            <i class="fas fa-info-circle mr-2 text-blue-500"></i>
-                            Menampilkan {{ matkuls|length }} dari {{ matkuls|length }} mata kuliah
-                        </span>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        
+    
+</div>
 
-        
-    </div>
-
-
-
-{% endblock %}
 

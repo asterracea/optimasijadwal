@@ -1,16 +1,16 @@
 {% extends 'layout.html' %}
 {% block title %} Hasil Jadwal {% endblock %}
 {% block content %}
-<div class="rounded-lg">
-        <div class="bg-gradient-to-r from-[#003b73] to-[#0056b3] rounded-t-lg shadow-lg">
-            <div class="px-4 py-2">
-                <div class="flex items-center justify-center">
-                        <h1 class="text-white items-center text-xl font-bold mb-2">Kirim Data Perkuliahan</h1>    
-                </div>
+<div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+       <div class="bg-[#003b73] px-8 py-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    Kirim Jadwal
+                </h2>
+                
             </div>
         </div>
-        
-        <div class="overflow-x-auto bg-white p-4">
+        <div class="overflow-x-auto bg-white p-6">
             <form method="POST">
                 <div class="flex items-center mb-5 space-x-4">
                     <label for="id_generate" class="text-gray-700 text-sm font-bold whitespace-nowrap w-1/4">

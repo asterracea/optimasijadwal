@@ -95,10 +95,10 @@ class PenjadwalanSA:
             tb_matakuliah.nama_semester AS semester,
             tb_prodi.nama_prodi AS prodi
         FROM tb_perkuliahan
+        JOIN tb_generate ON tb_generate.id_generate = tb_rombel.id_generate 
         JOIN tb_matakuliah ON tb_perkuliahan.kode_matakuliah = tb_matakuliah.kode_matakuliah
         JOIN tb_rombel ON tb_perkuliahan.id_kelasrombel = tb_rombel.id_kelasrombel
         JOIN tb_dosen ON tb_perkuliahan.kode_dosen = tb_dosen.kode_dosen
-        JOIN tb_generate ON tb_generate.id_generate = tb_rombel.id_generate 
         JOIN tb_prodi ON tb_perkuliahan.kode_prodi = tb_prodi.kode_prodi
         AND tb_generate.id_generate = tb_matakuliah.id_generate 
         AND tb_generate.id_generate = tb_dosen.id_generate
@@ -146,10 +146,9 @@ class PenjadwalanSA:
             
         
     def tambah_dosen(self, nama):
-        for d in self.daftar_dosen:
-            if d.nama == nama:
-                return d
-        dosen = Dosen(nama)
+        # for d in self.daftar_dosen:
+        #     if d.nama == nama:
+        #         return d
         dosen = Dosen(nama)
         self.daftar_dosen.append(dosen)
         return dosen

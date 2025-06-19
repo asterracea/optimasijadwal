@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 {% block title %}Generate Jadwal{% endblock %}
 {% block content %}
-<div class="bg-white shadow-xl rounded-2xl overflow-hidden mb-5">
-  <div class="bg-[#003b73] px-5 py-3">
+<div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+  <div class="bg-[#003b73] px-8 py-6">
     <h2 class="text-xl font-semibold text-white flex items-center">
       <i class="fas fa-cogs mr-3"></i>
       Parameter Optimasi
@@ -34,7 +34,6 @@
               <option value="">Tidak ada ID tersedia</option>
             {% endfor %}
           </select>
-          <p class="text-xs text-gray-500 mt-1">Pilih dataset yang akan digunakan untuk optimasi jadwal</p>
         </div>
       </div>
 
@@ -122,13 +121,13 @@
       <div class="flex justify-end sm:flex-row gap-4 pt-6 border-t border-gray-200">
         <button 
           type="reset" 
-          class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300">
+          class="px-8 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-yellow-300">
           <i class="fas fa-undo mr-2"></i>
           Reset
         </button>
         <button 
           type="submit" 
-          class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-300">
+          class="px-8 py-3 bg-green-500  hover:bg-green-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-300">
           <i class="fas fa-play mr-2"></i>
           Generate Jadwal
         </button>
