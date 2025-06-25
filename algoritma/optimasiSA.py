@@ -25,7 +25,7 @@ class Dosen:
         return f"Dosen(nama={self.nama})"
 
 class Matakuliah:
-    def __init__(self, matkul, dosen, sks, kelas, id_perkuliahan, id_semester, semester,kategori,prodi,status = None): #tambah id_perkuliahan
+    def __init__(self, matkul, dosen, sks, kelas, id_perkuliahan, id_semester, semester,kategori,prodi,valid_lab=None,status = None): #tambah id_perkuliahan
         self.id_perkuliahan = id_perkuliahan
         self.matkul = matkul
         self.dosen = dosen
@@ -36,6 +36,7 @@ class Matakuliah:
         self.semester = semester
         self.kategori = kategori
         self.prodi=prodi
+        self.valid_lab = valid_lab if valid_lab else []
         self.ruang_needed = self.set_ruang(kategori,status)
 
     def __repr__(self):
@@ -78,6 +79,11 @@ class PenjadwalanSA:
         ]
         self.daftar_slot = self.generate_slot_waktu()
         self.prodi_jadwal = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None))))
+        
+        self.harus_lab = {
+                "Jaringan Komputer": ["Lab 216"],
+                "Praktikum Jaringan Komputer": ["Lab 216"],
+            }
 
         self.baca_datamk()
         self.baca_dataruang()
@@ -110,11 +116,14 @@ class PenjadwalanSA:
         """)
         with self.engine.connect() as connection:
             df_matkul = pd.read_sql_query(query, connection, params={"id_generate": self.id_generate})
-
+        
+        
         # Iterasi per baris untuk menambahkan data
         for _, row in df_matkul.iterrows():
             dosen_obj = self.tambah_dosen(row['dosen'])
-            self.tambah_matkul(row['matakuliah'], dosen_obj, row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['semester'],row['kategori'],row['prodi'])
+            valid_lab = self.harus_lab.get(row['matakuliah'], [])
+
+            self.tambah_matkul(row['matakuliah'], dosen_obj, row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['semester'],row['kategori'],row['prodi'],valid_lab)
     
     def baca_datadosen(self):
         query = text("""
@@ -160,8 +169,8 @@ class PenjadwalanSA:
         self.daftar_ruang.append(ruang)
         return ruang
     
-    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,kategori,prodi):
-        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester,semester,kategori,prodi,status) #tambahkan id_perkuliahan
+    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,kategori,prodi,valid_lab):
+        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester,semester,kategori,prodi,valid_lab,status) #tambahkan id_perkuliahan
         self.daftar_matkul.append(matkul)
         return matkul
 
@@ -199,8 +208,25 @@ class PenjadwalanSA:
             menit_total = 0
         return math.ceil(menit_total / 50)
     
-    def get_ruang_valid(self,matkul):
+    def get_ruang_valid(self, matkul):
+        if matkul.matkul == "Praktikum Jaringan Komputer" and matkul.status == "Lab":
+            for ruang in self.daftar_ruang:
+                if ruang.nama == "Lab 216":
+                    return ruang
+
+        if matkul.matkul == "Jaringan Komputer" and matkul.status == "Lab":
+            for ruang in self.daftar_ruang:
+                if ruang.nama == "Lab 216":
+                    return ruang
+
+        if matkul.valid_lab:
+            ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.nama in matkul.valid_lab]
+            if ruang_valid:
+                return random.choice(ruang_valid)
+
+        # Default, pilih sesuai kebutuhan ruang
         ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.ruang_needed or any(t in ruang.tipe_ruang for t in matkul.ruang_needed)]
+        
         return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
 
     def anneal(self):

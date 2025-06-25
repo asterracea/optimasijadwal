@@ -512,7 +512,7 @@ def get_token():
     if request.method == 'POST':
         username = request.form.get('usn')
         password = request.form.get('usnpass')
-        callback_uri = "http://192.168.170.173:8081/optimasi/login"
+        callback_uri = "http://192.168.1.194:8081/optimasi/login"
         payload = {
             "username": username,
             "password": password
