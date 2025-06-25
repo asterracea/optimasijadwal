@@ -1,0 +1,21 @@
+
+<!-- Modal Pesan -->
+<div id="modalPesan" class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md">
+    <h2 class="text-xl font-bold mb-4 text-gray-700">Notifikasi</h2>
+    <p id="pesanServer" class="mb-4 text-gray-600"></p>
+    <button id="tutupModalPesan" class="px-4 py-2 bg-blue-600 text-white rounded">Tutup</button>
+  </div>
+</div>
+
+<script>
+    function tampilkanModalPesan(pesan) {
+        document.getElementById('pesanServer').textContent = pesan;
+        document.getElementById('modalPesan').classList.remove('hidden');
+    }
+
+    document.getElementById('tutupModalPesan').addEventListener('click', () => {
+        document.getElementById('modalPesan').classList.add('hidden');
+    });
+
+</script>

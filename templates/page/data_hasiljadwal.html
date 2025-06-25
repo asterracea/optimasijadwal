@@ -11,12 +11,15 @@
   <div class="overflow-x-auto p-2">
     <form method="POST" action="{{ url_for('data_hasil') }}" class="bg-slate-50 rounded-lg p-6 border border-slate-200">
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <label for="id_generate" class="text-[#003b73] font-semibold text-sm whitespace-nowrap">
-          <i class="fas fa-filter mr-2"></i>Pilih ID Generate:
+        <label for="id_generate" class="text-[#003b73] font-semibold text-xl whitespace-nowrap">
+          <i class="fas fa-filter mr-2"></i> Id Generate:
         </label>
         <div class="flex-1 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <select name="id_generate" id="id_generate" class="flex-1 px-4 py-3 rounded-full border border-slate-300 focus:ring-2 focus:ring-[#003b73] focus:border-transparent transition-all duration-200 bg-white shadow-sm">
-              <option value="">-- Pilih ID Generate --</option>
+            <select name="id_generate" id="id_generate" class=" w-64 px-4 py-2 text-[#003b73] bg-gray-200 rounded-full 
+                            border-none focus:ring-2 focus:ring-[#003b73] 
+                            focus:border-transparent focus:outline-none 
+                            transition-all duration-200 shadow-lg">
+              <option value="" class="text-[#003b73]">Pilih </option>
               {% for item in opsi_ids %}
                 <option value="{{ item.id_generate }}" {% if selected_id == item.id_generate|string %}selected{% endif %}>
                   {{ item.id_generate }}
@@ -24,8 +27,15 @@
               {% endfor %}
             </select>
             <button type="submit" 
-                    class="px-6 py-3 bg-[#003b73] text-white rounded-full hover:bg-blue-800 shadow-md hover:shadow-lg font-semibold whitespace-nowrap">
-              <i class="fas fa-search mr-2"></i>Tampilkan Jadwal
+                    class="px-6 py-3 bg-green-400 text-white rounded-full hover:bg-blue-800 shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
+                    value="filter">
+              <i class="fas fa-search mr-2"></i>
+            </button>
+            <button type="button" 
+                    class="px-6 py-3 bg-blue-400 text-white rounded-full hover:bg-blue-800 shadow-md hover:shadow-lg font-semibold whitespace-nowrap"
+                    value="send"
+                    data-modal-target="modalToken">
+              <i class="fas fa-paper-plane mr-2"></i>
             </button>
         </div>
       </div>
@@ -223,6 +233,10 @@
     {% endif %}
 </div>
 
+{% include 'modal/modal_token.html' %}
+{% include 'modal/modalsukses.html' %}
+<script src="{{ url_for('static', filename='js/modaltoken.js') }}"></script>
 
-  
+
+ 
 {% endblock %}

@@ -500,62 +500,18 @@ def daftar_endpoint():
     nama_user = claims.get("nama")
     role_user = claims.get("role")
     return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint', nama_user=nama_user,role_user=role_user)
-
-@app.route("/get-token", methods=["POST","GET"])
-@jwt_required()
-def get_token():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    access_token = None
-    if request.method == 'POST':
-        username = request.form.get('usn')
-        password = request.form.get('usnpass')
-        callback_uri = "http://192.168.1.194:8081/optimasi/login"
-        payload = {
-            "username": username,
-            "password": password
-        }
-        try:
-            res = requests.post(callback_uri, json=payload)
-            if res.status_code == 200:
-                data = res.json()
-                access_token = data.get('access_token')
-
-            else:
-                flash(f"Login gagal: {res.status_code}")
-                print("Status Code:", res.status_code)
-                print("Response Body:", res.text)
-        except Exception as e:
-            flash(f"Gagal menghubungi API: {str(e)}")
-    return render_template('page/get-token.html', access_token=access_token, nama_user=nama_user,role_user=role_user)
     
 
-@app.route("/send-data", methods=["GET", "POST"])
-@jwt_required()
+@app.route("/send-data", methods=["POST"])
 def kirim_hasil():
-    current_user = get_jwt_identity()
-    claims = get_jwt()
-    nama_user = claims.get("nama")
-    role_user = claims.get("role")
-    with db_url.connect() as connection:
-        opsi_ids = connection.execute(
-            text("SELECT DISTINCT p.id_generate FROM tb_hasil h JOIN tb_perkuliahan p ON h.id_perkuliahan = p.id_perkuliahan JOIN tb_generate g ON p.id_generate = g.id_generate WHERE g.status = 'sudah'")
-        ).mappings().all()
-    
-    if request.method == 'POST':
-        selected_id = request.form.get('id_generate')
-        token = request.form.get('sendaccess_token')
-        uri = request.form.get('api_url')
-
-        if selected_id and token:
-            sendApi(selected_id, token, uri)
-            flash("Data berhasil dikirim!", "success")
-        else:
-            flash("ID Generate atau Token tidak valid.", "danger")
-
-    return render_template("page/kirim_hasil.html", active_page='send_data', nama_user=nama_user,role_user=role_user, opsi_ids=opsi_ids)
+    data = request.get_json()
+    selected_id = data.get("id_generate")
+    token = data.get("token")
+    try:
+        sendApi(selected_id, token, "http://192.168.1.194:8081/optimasi/callback")
+        return jsonify({"message": "Data berhasil dikirim!", "status": "success"})
+    except Exception as e:
+        return jsonify({"message": f"Gagal mengirim data: {str(e)}", "status": "error"}), 500
 
 
 @app.route("/logout")

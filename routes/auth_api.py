@@ -55,33 +55,6 @@ def receive_data():
         print("Error parsing JSON:", e)
         return jsonify({"status": "failed", "error": str(e)}), 400
 
-def get_token():
-    if request.method == 'POST':
-        username = request.form.get('usn')
-        password = request.form.get('usnpass')
-        endpoint = request.form.get('endpoint')
-        payload = {
-            "username": username,
-            "password": password
-        }
-        try:
-            res = requests.post(endpoint, json=payload)
-            if res.status_code == 200:
-                data = res.json()
-                access_token = data.get('access_token')
 
-                if access_token:
-                    response = make_response("Login berhasil!")
-                    # Simpan token di cookie
-                    response.set_cookie('access_token', access_token, httponly=True)
-                    return response
-                else:
-                    flash("Token tidak ditemukan dalam response")
-            else:
-                flash(f"Login gagal: {res.status_code}")
-        except Exception as e:
-            flash(f"Gagal menghubungi API: {str(e)}")
-    return render_template('../templates/page/setting.html', access_token=access_token)
-    
 
  
