@@ -10,6 +10,8 @@ from sqlalchemy import create_engine, text
 from algoritma.optimasiSA import PenjadwalanSA
 import requests
 from datetime import timedelta
+from functools import wraps
+from flask import abort
 
 
 app = Flask(__name__)
@@ -22,27 +24,35 @@ app.config["JWT_TOKEN_LOCATION"] = ["cookies","headers"]
 app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
 app.config["JWT_COOKIE_CSRF_PROTECT"] = False #sementara
 app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
 
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
 @jwt.unauthorized_loader
 def unauthorized_callback(callback):
-    flash("Silakan login terlebih dahulu.", "warning")
-    return redirect(url_for('login'))
+    if request.path.startswith("/api/"):
+        return jsonify({"status": "unauthorized", "message": "Token tidak ditemukan"}), 401
+    else:
+        flash("Silakan login terlebih dahulu.", "warning")
+        return redirect(url_for('login'))
 
 @jwt.invalid_token_loader
 def invalid_token_callback(callback):
-    flash("Token tidak valid. Silakan login ulang.", "danger")
-    return redirect(url_for('login'))
+    if request.path.startswith("/api/"):
+        return jsonify({"status": "invalid token", "message": "Token tidak valid"}), 401
+    else:
+        flash("Token tidak valid. Silakan login ulang.", "danger")
+        return redirect(url_for('login'))
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    flash("Sesi Anda telah habis. Silakan login ulang.", "warning")
-    return redirect(url_for('login'))
-from functools import wraps
-from flask import abort
+    if request.path.startswith("/api/"):
+        return jsonify({"status": "expired token", "message": "Token telah kadaluwarsa"}), 401
+    else:
+        flash("Sesi Anda telah habis. Silakan login ulang.", "warning")
+        return redirect(url_for('login'))
+
 
 def admin_required(fn):
     @wraps(fn)
@@ -170,9 +180,28 @@ def data_master():
     dosen_data, matkul_data, perkuliahan_data, ruang_data, rombel_data, prodi_data, waktu_data = [], [], [], [], [], [], []
     if selected_id:
         with db_url.connect() as connection:
+            query = text("""
+                        SELECT 
+                            p.id_perkuliahan,
+                            p.id_generate,
+                            mk.nama_matakuliah,
+                            mk.sks,
+                            d.nama_dosen,
+                            k.nama_kelas,
+                            s.nama_semester,
+                            pr.nama_prodi
+                        FROM tb_perkuliahan p
+                        JOIN tb_matakuliah mk ON p.kode_matakuliah = mk.kode_matakuliah
+                        JOIN tb_dosen d ON p.kode_dosen = d.kode_dosen
+                        JOIN tb_rombel k ON p.id_kelasrombel = k.id_kelasrombel
+                        JOIN tb_semester s ON p.id_semester = s.id_semester
+                        JOIN tb_prodi pr ON p.kode_prodi = pr.kode_prodi
+                        WHERE p.id_generate = :id
+                    """)
+
             dosen = connection.execute(text("SELECT * FROM tb_dosen WHERE id_generate = :id"), {"id": selected_id})
             mk = connection.execute(text("SELECT * FROM tb_matakuliah WHERE id_generate = :id"), {"id": selected_id})
-            pk = connection.execute(text("SELECT * FROM tb_perkuliahan WHERE id_generate = :id"), {"id": selected_id})
+            pk = connection.execute(query, {"id": selected_id})
             ruang = connection.execute(text("SELECT * FROM tb_ruang WHERE id_generate = :id"), {"id": selected_id})
             rb = connection.execute(text("SELECT * FROM tb_rombel WHERE id_generate = :id"), {"id": selected_id})
             ps = connection.execute(text("SELECT * FROM tb_prodi WHERE id_generate = :id"), {"id": selected_id})
@@ -199,7 +228,6 @@ def data_master():
                            waktu=waktu_data,
                            nama_user=nama_user,
                            role_user=role_user)
-
 
 
 @app.route("/data/generate")

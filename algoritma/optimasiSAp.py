@@ -84,29 +84,29 @@ class PenjadwalanSA:
 
     def baca_datamk(self):
         query = text("""
-        WITH filtered_generate AS (
-            SELECT id_generate
-            FROM tb_generate
-            WHERE tb_generate.status = 'belum' AND tb_generate.id_generate = :id_generate
-        )
-        SELECT 
-            tb_rombel.nama_kelas AS kelas,
+        SELECT tb_rombel.nama_kelas AS kelas,
             tb_matakuliah.nama_matakuliah AS matakuliah,
             tb_dosen.nama_dosen AS dosen,
             tb_matakuliah.sks AS sks,
             tb_matakuliah.status AS status,
             tb_matakuliah.kategori AS kategori,
-            tb_perkuliahan.id_perkuliahan,
-            tb_perkuliahan.id_semester,
+            tb_matakuliah.kode_matakuliah AS kode_mk,  
+            tb_matakuliah.kode_pasangan AS kode_pasangan,
+            id_perkuliahan,
+            id_semester,
             tb_matakuliah.nama_semester AS semester,
             tb_prodi.nama_prodi AS prodi
-        FROM filtered_generate g
-        JOIN tb_rombel ON g.id_generate = tb_rombel.id_generate
-        JOIN tb_perkuliahan ON tb_perkuliahan.id_kelasrombel = tb_rombel.id_kelasrombel
-        JOIN tb_matakuliah ON tb_perkuliahan.kode_matakuliah = tb_matakuliah.kode_matakuliah AND tb_matakuliah.id_generate = g.id_generate
-        JOIN tb_dosen ON tb_perkuliahan.kode_dosen = tb_dosen.kode_dosen AND tb_dosen.id_generate = g.id_generate
-        JOIN tb_prodi ON tb_perkuliahan.kode_prodi = tb_prodi.kode_prodi AND tb_prodi.id_generate = g.id_generate;
-        
+        FROM tb_perkuliahan                    
+        JOIN tb_matakuliah ON tb_perkuliahan.kode_matakuliah = tb_matakuliah.kode_matakuliah
+        JOIN tb_rombel ON tb_perkuliahan.id_kelasrombel = tb_rombel.id_kelasrombel
+        JOIN tb_dosen ON tb_perkuliahan.kode_dosen = tb_dosen.kode_dosen
+        JOIN tb_generate ON tb_generate.id_generate = tb_rombel.id_generate
+        JOIN tb_prodi ON tb_perkuliahan.kode_prodi = tb_prodi.kode_prodi
+        AND tb_generate.id_generate = tb_matakuliah.id_generate 
+        AND tb_generate.id_generate = tb_dosen.id_generate
+        AND tb_generate.id_generate = tb_prodi.id_generate
+        WHERE tb_generate.status = 'belum' 
+        AND tb_generate.id_generate = :id_generate
         """)
         with self.engine.connect() as connection:
             df_matkul = pd.read_sql_query(query, connection, params={"id_generate": self.id_generate})
@@ -114,8 +114,13 @@ class PenjadwalanSA:
         # Iterasi per baris untuk menambahkan data
         for _, row in df_matkul.iterrows():
             dosen_obj = self.tambah_dosen(row['dosen'])
-            self.tambah_matkul(row['matakuliah'], dosen_obj, row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['semester'],row['kategori'],row['prodi'])
-    
+            self.tambah_matkul(
+                row['matakuliah'], dosen_obj, row['sks'], row['kelas'], 
+                row['status'], row['id_perkuliahan'], row['id_semester'], 
+                row['semester'], row['kategori'], row['prodi'], 
+                row['kode_mk'], row['kode_pasangan']
+            )
+
     def baca_datadosen(self):
         query = text("""
             SELECT nama_dosen AS dosen
@@ -160,8 +165,8 @@ class PenjadwalanSA:
         self.daftar_ruang.append(ruang)
         return ruang
     
-    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,kategori,prodi):
-        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester,semester,kategori,prodi,status) #tambahkan id_perkuliahan
+    def tambah_matkul(self, matkul, dosen, sks, kelas, status, id_perkuliahan, id_semester, semester, kategori, prodi, kode_mk=None, kode_pasangan=None):
+        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester, semester, kategori, prodi, status, kode_mk, kode_pasangan)
         self.daftar_matkul.append(matkul)
         return matkul
 
@@ -203,6 +208,22 @@ class PenjadwalanSA:
         ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.ruang_needed or any(t in ruang.tipe_ruang for t in matkul.ruang_needed)]
         return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
 
+    def find_paired_course(self, matkul):
+        if not matkul.kode_pasangan:
+            return None
+        
+        for mk in self.daftar_matkul:
+            if mk.kode_mk == matkul.kode_pasangan:
+                return mk
+        return None
+    
+    def is_paired_courses(self, mk1, mk2):
+        return (mk1.kode_pasangan == mk2.kode_mk or mk2.kode_pasangan == mk1.kode_mk)
+
+    # def is_paired_courses(self, mk1, mk2):
+    #     return (mk1.kode_pasangan == mk2.kode_mk and 
+    #             mk2.kode_pasangan == mk1.kode_mk)
+
     def anneal(self):
         current_solution = self.solusi_awal()
         current_energy = self.calculate_energy(current_solution)
@@ -232,38 +253,118 @@ class PenjadwalanSA:
 
     def solusi_awal(self):
         solution = []
+        scheduled_courses = set()  # Track kode_mk mata kuliah yang sudah dijadwalkan
+        
         for matkul in self.daftar_matkul:
-            ruang = self.get_ruang_valid(matkul)
-            hari = random.choice(self.daftar_hari)
-            durasi = self.jam_sks(matkul.sks, matkul.kategori)
-            max_jam_mulai = len(self.daftar_slot) - durasi
-
-            if max_jam_mulai <= 0:
-                print(f"Matkul {matkul.nama} ({durasi} slot) tidak muat dalam hari (slot tersedia: {len(self.daftar_slot)})")
-                continue  # Skip matkul yang tidak muat
-
-            jam_mulai = random.randint(0, max_jam_mulai)
-            solution.append((matkul, ruang, hari, jam_mulai))
+            if matkul.kode_mk in scheduled_courses:
+                continue  # Skip jika sudah dijadwalkan sebagai pasangan
+                
+            paired_course = self.find_paired_course(matkul)
+            
+            if paired_course and paired_course.kode_mk not in scheduled_courses:
+                # Jadwalkan mata kuliah berpasangan berurutan
+                durasi_mk1 = self.jam_sks(matkul.sks, matkul.kategori)
+                durasi_mk2 = self.jam_sks(paired_course.sks, paired_course.kategori)
+                total_durasi = durasi_mk1 + durasi_mk2
+                
+                max_jam_mulai = len(self.daftar_slot) - total_durasi
+                
+                if max_jam_mulai > 0:
+                    ruang1 = self.get_ruang_valid(matkul)
+                    ruang2 = self.get_ruang_valid(paired_course)
+                    hari = random.choice(self.daftar_hari)
+                    jam_mulai1 = random.randint(0, max_jam_mulai)
+                    jam_mulai2 = jam_mulai1 + durasi_mk1
+                    
+                    solution.append((matkul, ruang1, hari, jam_mulai1))
+                    solution.append((paired_course, ruang2, hari, jam_mulai2))
+                    
+                    scheduled_courses.add(matkul.kode_mk)
+                    scheduled_courses.add(paired_course.kode_mk)
+                else:
+                    print(f"Mata kuliah berpasangan {matkul.matkul} dan {paired_course.matkul} tidak muat dalam satu hari")
+                    # Jadwalkan terpisah jika tidak muat
+                    ruang = self.get_ruang_valid(matkul)
+                    hari = random.choice(self.daftar_hari)
+                    jam_mulai = random.randint(0, len(self.daftar_slot) - durasi_mk1)
+                    solution.append((matkul, ruang, hari, jam_mulai))
+                    scheduled_courses.add(matkul.kode_mk)
+            else:
+                # Mata kuliah biasa tanpa pasangan
+                ruang = self.get_ruang_valid(matkul)
+                hari = random.choice(self.daftar_hari)
+                durasi = self.jam_sks(matkul.sks, matkul.kategori)
+                max_jam_mulai = len(self.daftar_slot) - durasi
+                
+                if max_jam_mulai <= 0:
+                    print(f"Matkul {matkul.matkul} ({durasi} slot) tidak muat dalam hari (slot tersedia: {len(self.daftar_slot)})")
+                    continue
+                    
+                jam_mulai = random.randint(0, max_jam_mulai)
+                solution.append((matkul, ruang, hari, jam_mulai))
+                scheduled_courses.add(matkul.kode_mk)
+        
         return solution
     
     def get_neighbor(self, solution):
         neighbor = solution.copy()
         index = random.randint(0, len(neighbor) - 1)
         matkul, _, _, _ = neighbor[index]
-        ruang = self.get_ruang_valid(matkul)
-        hari = random.choice(self.daftar_hari)
-        jam_mulai = random.randint(0, len(self.daftar_slot) - self.jam_sks(matkul.sks,matkul.kategori))
-        neighbor[index] = (matkul, ruang, hari, jam_mulai)
+        
+        # Cek apakah mata kuliah ini memiliki pasangan
+        paired_course = self.find_paired_course(matkul)
+        
+        if paired_course:
+            # Jika ada pasangan, jadwalkan keduanya berurutan
+            durasi_mk1 = self.jam_sks(matkul.sks, matkul.kategori)
+            durasi_mk2 = self.jam_sks(paired_course.sks, paired_course.kategori)
+            total_durasi = durasi_mk1 + durasi_mk2
+            
+            # Pastikan ada cukup slot untuk kedua mata kuliah
+            max_jam_mulai = len(self.daftar_slot) - total_durasi
+            if max_jam_mulai > 0:
+                ruang1 = self.get_ruang_valid(matkul)
+                ruang2 = self.get_ruang_valid(paired_course)
+                hari = random.choice(self.daftar_hari)
+                jam_mulai1 = random.randint(0, max_jam_mulai)
+                jam_mulai2 = jam_mulai1 + durasi_mk1
+                
+                # Update kedua mata kuliah
+                neighbor[index] = (matkul, ruang1, hari, jam_mulai1)
+                
+                # Cari dan update mata kuliah pasangan
+                for i, (mk, _, _, _) in enumerate(neighbor):
+                    if mk == paired_course:
+                        neighbor[i] = (paired_course, ruang2, hari, jam_mulai2)
+                        break
+            else:
+                # Jika tidak cukup slot, gunakan cara biasa
+                ruang = self.get_ruang_valid(matkul)
+                hari = random.choice(self.daftar_hari)
+                jam_mulai = random.randint(0, len(self.daftar_slot) - self.jam_sks(matkul.sks, matkul.kategori))
+                neighbor[index] = (matkul, ruang, hari, jam_mulai)
+        else:
+            # Mata kuliah biasa tanpa pasangan
+            ruang = self.get_ruang_valid(matkul)
+            hari = random.choice(self.daftar_hari)
+            jam_mulai = random.randint(0, len(self.daftar_slot) - self.jam_sks(matkul.sks, matkul.kategori))
+            neighbor[index] = (matkul, ruang, hari, jam_mulai)
+        
         return neighbor
     
     def calculate_energy(self, solution):
         conflicts = 0
+        
+        # Existing conflict checks
         for i, (mk1, r1, h1, j1) in enumerate(solution):
-            slots_needed1 = self.jam_sks(mk1.sks,mk1.kategori)
+            slots_needed1 = self.jam_sks(mk1.sks, mk1.kategori)
+            
             if mk1.ruang_needed and not any(t in r1.tipe_ruang for t in mk1.ruang_needed):
-                conflicts += 10  # Penalti besar untuk matakuliah yang tidak di ruang yang sesuai
+                conflicts += 10
+                
             for mk2, r2, h2, j2 in solution[i+1:]:
-                slots_needed2 = self.jam_sks(mk2.sks,mk2.kategori)
+                slots_needed2 = self.jam_sks(mk2.sks, mk2.kategori)
+                
                 if h1 == h2:
                     if r1 == r2 and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
                         conflicts += 1
@@ -271,6 +372,24 @@ class PenjadwalanSA:
                         conflicts += 1
                     if mk1.prodi == mk2.prodi and mk1.semester == mk2.semester and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
                         conflicts += 1
+        
+        # Tambahan: Penalti untuk mata kuliah berpasangan yang tidak berurutan
+        for i, (mk1, r1, h1, j1) in enumerate(solution):
+            paired_course = self.find_paired_course(mk1)
+            if paired_course:
+                # Cari jadwal mata kuliah pasangan
+                for mk2, r2, h2, j2 in solution:
+                    if mk2 == paired_course:
+                        slots_needed1 = self.jam_sks(mk1.sks, mk1.kategori)
+                        
+                        # Penalti jika tidak di hari yang sama
+                        if h1 != h2:
+                            conflicts += 5
+                        # Penalti jika tidak berurutan (mata kuliah kedua tidak langsung setelah yang pertama)
+                        elif j1 + slots_needed1 != j2:
+                            conflicts += 3
+                        break
+        
         return conflicts
     
     def accept_probability(self, current_energy, neighbor_energy, temperature):

@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
 {% block title %} Master Data{% endblock %}
 {% block content %}
-
 <div class=" bg-white shadow-xl rounded-2xl overflow-hidden">
     <div class="bg-white px-8 py-6">
         <div class="flex items-center justify-between">
@@ -14,27 +13,41 @@
     </div>
     <div class="overflow-x-auto p-2">
         <form method="POST" class="bg-slate-50 rounded-lg p-6 border border-slate-200">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <label for="id_generate" class="text-[#003b73] font-semibold text-sm whitespace-nowrap">
-            <i class="fas fa-filter mr-2"></i>Pilih ID Generate:
-            </label>
-            <div class="flex-1 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <select name="id_generate" id="id_generate" class="flex-1 px-4 py-3 rounded-full border border-slate-300 focus:ring-2 focus:ring-[#003b73] focus:border-transparent transition-all duration-200 bg-white shadow-sm">
-                <option value="">-- Pilih ID Generate --</option>
-                    {% for item in generate_ids %}
-                    <option value="{{ item.id_generate }}" {% if selected_id == item.id_generate|string %}selected{% endif %}>
-                    {{ item.id_generate }}
-                    </option>
-                {% endfor %}
-                </select>
-                <button type="submit" 
-                        class="px-6 py-3 bg-green-500 text-white rounded-full hover:bg-blue-800 shadow-md hover:shadow-lg font-semibold whitespace-nowrap">
-                <i class="fas fa-search mr-2"></i>Tampilkan Jadwal
-                </button>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <label for="id_generate" class="text-[#003b73] font-semibold text-lg whitespace-nowrap">
+                    <i class="fas fa-filter mr-2"></i>Id Generate:
+                </label>
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <select 
+                        name="id_generate" 
+                        id="id_generate" 
+                        class="px-4 py-2 text-[#003b73] bg-gray-200 text-lg rounded-full 
+                            border-none focus:ring-2 focus:ring-[#003b73] 
+                            focus:border-transparent focus:outline-none 
+                            transition-all duration-200 shadow-lg"
+                    >
+                        <option value="" class="text-[#003b73]">-- Pilih ID Generate --</option>
+                        {% for item in generate_ids %}
+                            <option value="{{ item.id_generate }}" {% if selected_id == item.id_generate|string %}selected{% endif %}>
+                                {{ item.id_generate }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div>
+                        <button type="submit" 
+                            class="px-4 py-3 bg-green-500 text-white text-base rounded-full 
+                                hover:bg-blue-800 shadow-md hover:shadow-lg font-semibold 
+                                transition-all duration-200 flex items-center justify-center">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                   
+                </div>
             </div>
-        </div>
         </form>   
-    </div>   
+    </div>
+
     <!-- tab nav -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         {% set tombolnav = [

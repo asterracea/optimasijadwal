@@ -24,7 +24,7 @@ def simpanData(json_data, id_user):
             )
 
         # dataframe yang dibutuhkan untuk dimasukkan ke database
-        df_dosen = df_setjadwal[['kode_dosen', 'nama_dosen']].drop_duplicates()
+        df_dosen = df_setjadwal[['kode_dosen','nipnidn','nama_dosen']].drop_duplicates()
         df_semester = df_setjadwal[['id_semester', 'nama_semester']].drop_duplicates()
         df_rombel = df_setjadwal[['id_kelasrombel', 'nama_kelas']].drop_duplicates()
         df_prodi = df_setjadwal[['kode_prodi','nama_prodi']].drop_duplicates()
@@ -32,7 +32,7 @@ def simpanData(json_data, id_user):
         df_ruang = df_setruang[['kode_ruang', 'nama_ruangan', 'status_ruangan']].drop_duplicates()
         df_waktu = df_setwaktu[['id_waktu','jam_mulai','jam_selesai','nama_hari']].drop_duplicates()
 
-        df_dosen["nipnidn"] = df_dosen["kode_dosen"]
+    
         df_dosen["id_generate"] = idGenerate
         df_dosen["kode_dosen"] = df_dosen["id_generate"].astype(str) + "_" + df_dosen["kode_dosen"].astype(str)
 
@@ -42,9 +42,10 @@ def simpanData(json_data, id_user):
         df_rombel["id_generate"] = idGenerate
         df_rombel["id_kelasrombel"] = df_rombel["id_generate"].astype(str) + "_" + df_rombel["id_kelasrombel"].astype(str)
 
- 
+        df_matkul["kode_mk"] = df_matkul["kode_matakuliah"].astype(str)
         df_matkul["id_generate"] = idGenerate
         df_matkul["kode_matakuliah"] = df_matkul["id_generate"].astype(str) + "_" + df_matkul["kode_matakuliah"].astype(str)
+        
 
         df_ruang["kode_ruangan"] = df_ruang["kode_ruang"]
         df_ruang["id_generate"] = idGenerate

@@ -16,7 +16,6 @@ def login():
     password = data.get("password")
     if not email or not password:
         return jsonify(msg="Email dan password harus diisi"), 400
-
     try:
         with db_url.connect() as conn:
             query = text("SELECT * FROM tb_user WHERE email = :email")
@@ -27,14 +26,11 @@ def login():
             token = create_access_token(identity=str(user["id_user"]))
             return jsonify({
                 "access_token": token,
-                "user_info": {
-                    "email": user["email"],
-                    "id_user": user["id_user"]
-                }
+                "status": "success",
+                "message": "Login berhasil",
                 }), 200
         else:
             return jsonify(msg="Email atau password salah"), 401
-
     except Exception as e:
         return jsonify(msg=f"Terjadi kesalahan server: {str(e)}"), 500
 
@@ -52,9 +48,9 @@ def receive_data():
 
         data = request.get_json()
         simpanData(data, id_user)
-        return jsonify({"status": "successss",
+        return jsonify({"status": "success",
                         "user_id": id_user,
-            "message": "Data berhasil disimpan"}), 200
+                        "message": "Data berhasil disimpan"}), 200
     except Exception as e:
         print("Error parsing JSON:", e)
         return jsonify({"status": "failed", "error": str(e)}), 400
