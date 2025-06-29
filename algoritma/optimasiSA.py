@@ -209,7 +209,7 @@ class PenjadwalanSA:
         return math.ceil(menit_total / 50)
     
     def get_ruang_valid(self, matkul):
-        if matkul.matkul == "Praktikum Jaringan Komputer" and matkul.status == "Lab":
+        if matkul.matkul == "Praktik Jaringan Komputer" and matkul.status == "Lab":
             for ruang in self.daftar_ruang:
                 if ruang.nama == "Lab 216":
                     return ruang
