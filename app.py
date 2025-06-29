@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request,redirect,jsonify,url_for,flash,make_response,session,logging
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt, get_jwt_identity,  decode_token
 from flask_cors import CORS
-from routes.auth_api import api
+from flask_socketio import SocketIO, emit
+# from routes.auth_api import api
+from routes.auth_api import create_auth_api
 from routes.sendApi import sendApi
 from config import db_url
 from flask_bcrypt import Bcrypt
@@ -14,9 +16,11 @@ from functools import wraps
 from flask import abort
 
 
+
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
-app.register_blueprint(api)
+app.register_blueprint(create_auth_api(socketio))
 
 app.secret_key = "kyutpipel"
 app.config["JWT_SECRET_KEY"] = "semhaslancar"
@@ -523,4 +527,4 @@ def logout():
     return response
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
