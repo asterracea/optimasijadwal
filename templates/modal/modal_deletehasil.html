@@ -1,0 +1,10 @@
+<div id="modalHapusHasil" class="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center hidden z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+    <h3 class="text-lg font-bold mb-4">Yakin ingin menghapus data ini?</h3>
+    <form method="POST" action="{{ url_for('delete_schedule') }}">
+      <input type="hidden" name="id_generate" id="hapus_id_generate">
+      <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700 mr-2">Ya, Hapus</button>
+      <button type="button" class="bg-gray-300 px-4 py-2 rounded-full hover:bg-gray-500" onclick="tutupModal()">Batal</button>
+    </form>
+  </div>
+</div>

@@ -37,7 +37,7 @@ class Matakuliah:
         self.kategori = kategori
         self.prodi=prodi
         self.valid_lab = valid_lab if valid_lab else []
-        self.ruang_needed = self.set_ruang(kategori,status)
+        self.butuh_tipe = self.set_ruang(kategori,status)
 
     def __repr__(self):
         return (f"matkul(matkul={self.matkul}, dosen={self.dosen}, sks={self.sks}, status={self.status})")
@@ -225,7 +225,7 @@ class PenjadwalanSA:
                 return random.choice(ruang_valid)
 
         # Default, pilih sesuai kebutuhan ruang
-        ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.ruang_needed or any(t in ruang.tipe_ruang for t in matkul.ruang_needed)]
+        ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.butuh_tipe or any(t in ruang.tipe_ruang for t in matkul.butuh_tipe)]
         
         return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
 
@@ -286,8 +286,8 @@ class PenjadwalanSA:
         conflicts = 0
         for i, (mk1, r1, h1, j1) in enumerate(solution):
             slots_needed1 = self.jam_sks(mk1.sks,mk1.kategori)
-            if mk1.ruang_needed and not any(t in r1.tipe_ruang for t in mk1.ruang_needed):
-                conflicts += 10  # Penalti besar untuk matakuliah yang tidak di ruang yang sesuai
+            if mk1.butuh_tipe and not any(tipe in r1.tipe_ruang for tipe in mk1.butuh_tipe):
+                conflicts += 10  
             for mk2, r2, h2, j2 in solution[i+1:]:
                 slots_needed2 = self.jam_sks(mk2.sks,mk2.kategori)
                 if h1 == h2:

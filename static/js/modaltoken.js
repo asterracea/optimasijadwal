@@ -1,37 +1,58 @@
+// Ambil semua elemen yang dibutuhkan
+const pilihId = document.getElementById('id_generate');
+const bukaModalToken = document.querySelector('[data-modal-target="modalToken"]');
+const modalToken = document.getElementById('modalToken');
+const notifIdSelected = document.getElementById('pesanPilihId');
+const cancelModalToken = document.getElementById('cancelModalToken');
+const formToken = document.getElementById('formToken');
 
-document.querySelector('[data-modal-target="modalToken"]').addEventListener('click', () => {
-    document.getElementById('modalToken').classList.remove('hidden');
-});
+// Tombol "Kirim" ditekan
+bukaModalToken.addEventListener('click', () => {
+    const selectedId = pilihId.value;
 
-document.getElementById('cancelModal').addEventListener('click', () => {
-    document.getElementById('modalToken').classList.add('hidden');
-});
-
-document.getElementById('formToken').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const username = this.username.value;
-    const password = this.password.value;
-    const id_generate = document.getElementById('id_generate').value;
-
-    if (!id_generate) {
-        tampilkanModalPesan("Pilih ID Generate terlebih dahulu!");
+    // Cek apakah ID Generate dipilih
+    if (!selectedId) {
+        notifIdSelected.classList.remove('hidden');
+        setTimeout(() => notifIdSelected.classList.add('hidden'), 5000);
         return;
     }
 
-    // Ambil token ke API Node.js
+    // Jika dipilih, tampilkan modal token
+    modalToken.classList.remove('hidden');
+});
+
+// Tombol "Batal" dalam modal token ditekan
+cancelModalToken.addEventListener('click', () => {
+    modalToken.classList.add('hidden');
+});
+
+// Submit form token
+formToken.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const username = this.username.value.trim();
+    const password = this.password.value.trim();
+    const id_generate = pilihId.value;
+
+    // Validasi input username/password
+    if (!username || !password) {
+        tampilkanModalPesan('Username dan Password tidak boleh kosong!');
+        return;
+    }
+
+    // Ambil token dari API Node.js
     fetch('http://192.168.1.194:8081/optimasi/login', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username, password})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
     })
     .then(res => res.json())
     .then(data => {
         if (data.access_token) {
-            // Kirim data ke backend Flask untuk diteruskan ke API tujuan
+            // Kirim ke server Flask
             fetch('/send-data', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id_generate: id_generate,
                     token: data.access_token
@@ -39,15 +60,16 @@ document.getElementById('formToken').addEventListener('submit', function(e) {
             })
             .then(res => res.json())
             .then(response => {
-               if (response.message) {
-                    document.getElementById('modalToken').classList.add('hidden');
-                    tampilkanModalPesan(response.message || 'Tidak ada pesan dari server.');
-                    
+                if (response.message) {
+                    modalToken.classList.add('hidden');
+                    tampilkanModalPesan(response.message);
+                } else {
+                    tampilkanModalPesan('Server tidak memberikan pesan.');
                 }
             })
-            .catch(() => tampilkanModalPesan('Gagal mengirim data ke server.'));
+            .catch(() => tampilkanModalPesan('Gagal mengirim data ke server Flask.'));
         } else {
-             tampilkanModalPesan('Gagal mendapatkan token. Cek username/password!');
+            tampilkanModalPesan('Gagal mendapatkan token. Cek username/password!');
         }
     })
     .catch(() => tampilkanModalPesan('Gagal menghubungi server autentikasi.'));

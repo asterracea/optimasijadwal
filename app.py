@@ -425,6 +425,51 @@ def data_hasil():
         ).mappings().all()
     return render_template("page/data_hasiljadwal.html",jadwals=jadwal_data, opsi_ids=opsi_id, selected_id=selected_id, active_page='hasiljadwal', nama_user=nama_user,role_user=role_user,bentrok=bentrok)
 
+@app.route("/delete-schedule", methods=["POST"])
+@jwt_required()
+def delete_schedule():
+    current_user = get_jwt_identity()
+
+    id_generate = request.form.get('id_generate')
+    
+    if not id_generate:
+        flash("ID Generate tidak ditemukan!", "warning")
+        return redirect(url_for('data_hasil'))
+
+    try:
+        with db_url.connect() as connection:
+            
+            # Hapus data tb_hasil sesuai id_generate
+            connection.execute(text("""
+                DELETE FROM tb_hasil
+                WHERE id_perkuliahan IN (
+                    SELECT id_perkuliahan FROM tb_perkuliahan WHERE id_generate = :id_generate
+                )
+            """), {"id_generate": id_generate})
+
+            # Update status di tb_generate jadi 'belum'
+            connection.execute(text("""
+                UPDATE tb_generate SET status = 'belum' WHERE id_generate = :id_generate
+            """), {"id_generate": id_generate})
+
+            # Commit transaksi
+            connection.commit()
+            
+            flash(f"Jadwal dengan ID {id_generate} berhasil dihapus!", "success")
+
+    except Exception as e:
+        # Pastikan rollback hanya dipanggil kalau connection masih terbuka
+        try:
+            connection.rollback()
+        except:
+            pass
+        flash(f"Gagal menghapus jadwal: {str(e)}", "danger")
+
+    return redirect(url_for('data_hasil'))
+
+
+
+
 @app.route("/settings", methods=["GET","POST"])
 @jwt_required()
 def setting():
