@@ -6,6 +6,8 @@ from config import db_url
 from sqlalchemy import create_engine, text
 from insertDB import simpanData
 import requests
+from routes.sendApi import sendApi
+
 
 
 bcrypt = Bcrypt()
@@ -70,6 +72,19 @@ def create_auth_api(socketio):  # socketio sebagai parameter
         except Exception as e:
             print("Error parsing JSON:", e)
             return jsonify({"status": "failed", "error": str(e)}), 400
+
+    @api.route("/api/send-data", methods=["POST"])
+    def kirim_hasil():
+        data = request.get_json()
+        selected_id = data.get("id_generate")
+        token = data.get("token")
+        try:
+            sendApi(selected_id, token, "http://192.168.1.225:8081/optimasi/callback")
+            return jsonify({"message": "Data berhasil dikirim!", "status": "success"})
+        except Exception as e:
+            return jsonify({"message": f"Gagal mengirim data: {str(e)}", "status": "error"}), 500
+        
+
     return api
 
 

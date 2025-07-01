@@ -2,9 +2,7 @@ from flask import Flask, render_template, request,redirect,jsonify,url_for,flash
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt, get_jwt_identity,  decode_token
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-# from routes.auth_api import api
 from routes.auth_api import create_auth_api
-from routes.sendApi import sendApi
 from config import db_url
 from flask_bcrypt import Bcrypt
 import pandas as pd
@@ -14,7 +12,6 @@ import requests
 from datetime import timedelta
 from functools import wraps
 from flask import abort
-
 
 
 app = Flask(__name__)
@@ -466,9 +463,6 @@ def delete_schedule():
 
     return redirect(url_for('data_hasil'))
 
-
-
-
 @app.route("/settings", methods=["GET","POST"])
 @jwt_required()
 def setting():
@@ -548,19 +542,6 @@ def daftar_endpoint():
     nama_user = claims.get("nama")
     role_user = claims.get("role")
     return render_template("page/daftar_endpoint.html", active_page='daftar_endpoint', nama_user=nama_user,role_user=role_user)
-    
-
-@app.route("/send-data", methods=["POST"])
-def kirim_hasil():
-    data = request.get_json()
-    selected_id = data.get("id_generate")
-    token = data.get("token")
-    try:
-        sendApi(selected_id, token, "http://192.168.1.225:8081/optimasi/callback")
-        return jsonify({"message": "Data berhasil dikirim!", "status": "success"})
-    except Exception as e:
-        return jsonify({"message": f"Gagal mengirim data: {str(e)}", "status": "error"}), 500
-
 
 @app.route("/logout")
 def logout():

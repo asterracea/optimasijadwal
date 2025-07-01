@@ -50,7 +50,7 @@ formToken.addEventListener('submit', function (e) {
     .then(data => {
         if (data.access_token) {
             // Kirim ke server Flask
-            fetch('/send-data', {
+            fetch('/api/send-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
