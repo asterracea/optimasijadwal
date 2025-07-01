@@ -82,9 +82,8 @@ class PenjadwalanSA:
         
         self.harus_lab = {
                 "Jaringan Komputer": ["Lab 216"],
-                "Praktikum Jaringan Komputer": ["Lab 216"],
+                "Praktik Jaringan Komputer": ["Lab 216"],
             }
-
         self.baca_datamk()
         self.baca_dataruang()
 
@@ -119,12 +118,14 @@ class PenjadwalanSA:
         
         
         # Iterasi per baris untuk menambahkan data
-        for _, row in df_matkul.iterrows():
-            dosen_obj = self.tambah_dosen(row['dosen'])
-            valid_lab = self.harus_lab.get(row['matakuliah'], [])
+        for row in df_matkul.itertuples(index=False):
+            dosen_obj = self.tambah_dosen(row.dosen)
+            valid_lab = self.harus_lab.get(row.matakuliah, [])
 
-            self.tambah_matkul(row['matakuliah'], dosen_obj, row['sks'], row['kelas'], row['status'], row['id_perkuliahan'],row['id_semester'],row['semester'],row['kategori'],row['prodi'],valid_lab)
-    
+            self.tambah_matkul(
+                    row.matakuliah, dosen_obj, row.sks, row.kelas, row.status,
+                    row.id_perkuliahan, row.id_semester, row.semester, row.kategori, row.prodi, valid_lab
+                )
     def baca_datadosen(self):
         query = text("""
             SELECT nama_dosen AS dosen
@@ -136,8 +137,8 @@ class PenjadwalanSA:
 
         with self.engine.connect() as connection:
             df_dosen = pd.read_sql_query(query, connection,params={"id_generate": self.id_generate})
-        for _, row in df_dosen.iterrows():
-            self.tambah_dosen(row['dosen'])
+        for row in df_dosen.itertuples(index=False):
+            self.tambah_dosen(row.dosen)
 
     def baca_dataruang(self):
         query = text("""
@@ -152,8 +153,8 @@ class PenjadwalanSA:
             df_ruang = pd.read_sql_query(query, connection,params={"id_generate": self.id_generate})
 
         # Iterasi per baris untuk menambahkan data
-        for _, row in df_ruang.iterrows():
-            self.tambah_ruang(row['nama_ruangan'], row['status_ruangan'])
+        for row in df_ruang.itertuples(index=False):
+            self.tambah_ruang(row.nama_ruangan, row.status_ruangan)
             
         
     def tambah_dosen(self, nama):
@@ -225,39 +226,39 @@ class PenjadwalanSA:
                 return random.choice(ruang_valid)
 
         # Default, pilih sesuai kebutuhan ruang
-        ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.butuh_tipe or any(t in ruang.tipe_ruang for t in matkul.butuh_tipe)]
+        ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.butuh_tipe or any(tipe in ruang.tipe_ruang for tipe in matkul.butuh_tipe)]
         
         return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
 
     def anneal(self):
         current_solution = self.solusi_awal()
-        current_energy = self.calculate_energy(current_solution)
+        current_score = self.evaluate_solution(current_solution)
         best_solution = current_solution
-        best_energy = current_energy
+        best_score = current_score
         temperature = self.initial_temperature
 
         for i in range(self.max_iterations):
             neighbor_solution = self.get_neighbor(current_solution)
-            neighbor_energy = self.calculate_energy(neighbor_solution)
+            neighbor_score = self.evaluate_solution(neighbor_solution)
 
-            if self.accept_probability(current_energy, neighbor_energy, temperature) > random.random():
-                current_solution = neighbor_solution
-                current_energy = neighbor_energy
+            delta_score = neighbor_score - current_score
+            acceptance_probability = math.exp(-delta_score / temperature) if delta_score > 0 else 1
 
-            if current_energy < best_energy:
-                best_solution = current_solution
-                best_energy = current_energy
+            if random.random() < acceptance_probability:
+                current_solution, current_score = neighbor_solution, neighbor_score
+                if current_score < best_score:
+                    best_solution, best_score = current_solution, current_score
 
             temperature *= self.cooling_rate
             if i % 10000 == 0:
-                print(f"Iterasi {i} | Skor saat ini: {current_energy} | Skor terbaik: {best_energy} | Temperatur: {temperature:.4f}")
+                print(f"Iterasi {i} | Skor saat ini: {current_score} | Skor terbaik: {best_score} | Temperatur: {temperature:.4f}")
 
         self.apply_solution(best_solution)
         self.best_solution = best_solution 
 
 
     def solusi_awal(self):
-        solution = []
+        solusi = []
         for matkul in self.daftar_matkul:
             ruang = self.get_ruang_valid(matkul)
             hari = random.choice(self.daftar_hari)
@@ -265,15 +266,15 @@ class PenjadwalanSA:
             max_jam_mulai = len(self.daftar_slot) - durasi
 
             if max_jam_mulai <= 0:
-                print(f"Matkul {matkul.nama} ({durasi} slot) tidak muat dalam hari (slot tersedia: {len(self.daftar_slot)})")
+                print(f"Matkul {matkul.matkul} ({durasi} slot) tidak muat dalam hari (slot tersedia: {len(self.daftar_slot)})")
                 continue  # Skip matkul yang tidak muat
 
             jam_mulai = random.randint(0, max_jam_mulai)
-            solution.append((matkul, ruang, hari, jam_mulai))
-        return solution
+            solusi.append((matkul, ruang, hari, jam_mulai))
+        return solusi
     
-    def get_neighbor(self, solution):
-        neighbor = solution.copy()
+    def get_neighbor(self, solusi):
+        neighbor = solusi.copy()
         index = random.randint(0, len(neighbor) - 1)
         matkul, _, _, _ = neighbor[index]
         ruang = self.get_ruang_valid(matkul)
@@ -282,33 +283,33 @@ class PenjadwalanSA:
         neighbor[index] = (matkul, ruang, hari, jam_mulai)
         return neighbor
     
-    def calculate_energy(self, solution):
-        conflicts = 0
-        for i, (mk1, r1, h1, j1) in enumerate(solution):
-            slots_needed1 = self.jam_sks(mk1.sks,mk1.kategori)
+    def evaluate_solution(self, solusi):
+        score = 0
+        for i, (mk1, r1, h1, j1) in enumerate(solusi):
+            durasi1 = self.jam_sks(mk1.sks,mk1.kategori)
             if mk1.butuh_tipe and not any(tipe in r1.tipe_ruang for tipe in mk1.butuh_tipe):
-                conflicts += 10  
-            for mk2, r2, h2, j2 in solution[i+1:]:
-                slots_needed2 = self.jam_sks(mk2.sks,mk2.kategori)
+                score += 10  
+            for mk2, r2, h2, j2 in solusi[i+1:]:
+                durasi2 = self.jam_sks(mk2.sks,mk2.kategori)
                 if h1 == h2:
-                    if r1 == r2 and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
-                        conflicts += 1
-                    if mk1.dosen == mk2.dosen and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
-                        conflicts += 1
-                    if mk1.prodi == mk2.prodi and mk1.semester == mk2.semester and max(j1, j2) < min(j1 + slots_needed1, j2 + slots_needed2):
-                        conflicts += 1
-        return conflicts
+                    if r1 == r2 and max(j1, j2) < min(j1 + durasi1, j2 + durasi2):
+                        score += 1
+                    if mk1.dosen == mk2.dosen and max(j1, j2) < min(j1 + durasi1, j2 + durasi2):
+                        score += 1
+                    if mk1.prodi == mk2.prodi and mk1.semester == mk2.semester and max(j1, j2) < min(j1 + durasi1, j2 + durasi2):
+                        score += 1
+        return score
     
-    def accept_probability(self, current_energy, neighbor_energy, temperature):
-        if neighbor_energy < current_energy:
+    def accept_probability(self, current_score, neighbor_score, temperature):
+        if neighbor_score < current_score:
             return 1.0
-        return math.exp((current_energy - neighbor_energy) / temperature)
+        return math.exp((current_score - neighbor_score) / temperature)
     
-    def apply_solution(self, solution):
+    def apply_solution(self, solusi):
         self.reset_jadwal()
-        for matkul, ruang, hari, jam_mulai in solution:
-            slots_needed = self.jam_sks(matkul.sks,matkul.kategori)
-            for i in range(slots_needed):
+        for matkul, ruang, hari, jam_mulai in solusi:
+            durasi = self.jam_sks(matkul.sks,matkul.kategori)
+            for i in range(durasi):
                 if jam_mulai + i < len(self.daftar_slot):  # pastikan jam_list
                     ruang.jadwal[hari][jam_mulai + i] = matkul
                     matkul.dosen.jadwal[hari][jam_mulai + i] = matkul
@@ -337,13 +338,13 @@ class PenjadwalanSA:
             query = text("UPDATE tb_generate SET status = :status WHERE id_generate = :id_generate")
             conn.execute(query, {"status": "sudah", "id_generate": self.id_generate})
             
-    def df_hasiljadwal(self, solution):
+    def df_hasiljadwal(self, solusi):
         data=[]
-        for matkul, ruang, hari, jam_mulai in solution:
-            butuh_slot = self.jam_sks(matkul.sks, matkul.kategori)
+        for matkul, ruang, hari, jam_mulai in solusi:
+            durasi = self.jam_sks(matkul.sks, matkul.kategori)
 
             waktu_mulai = self.daftar_slot[jam_mulai][0]
-            waktu_selesai = self.daftar_slot[jam_mulai + butuh_slot - 1][1]         
+            waktu_selesai = self.daftar_slot[jam_mulai + durasi - 1][1]         
 
             data.append({
                 'id_perkuliahan': matkul.id_perkuliahan,

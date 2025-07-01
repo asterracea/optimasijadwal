@@ -14,13 +14,13 @@
 <body class="bg-slate-100 h-screen overflow-hidden">
 
   <!-- Sidebar (tetap) -->
-  <div class="fixed inset-y-0 left-0 w-64 z-10 transform transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full" id="sidebar">
+  <div class="fixed inset-y-0 left-0 w-64 z-20 transform transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full" id="sidebar">
     {% include 'sidebar.html' %}
   </div>
 
   <!-- Overlay untuk mobile -->
   <div id="overlay"
-       class="fixed inset-0 z-20 hidden lg:hidden"
+       class="fixed inset-0 z-10 hidden lg:hidden"
        onclick="closeSidebar()"></div>
 
   <!-- Wrapper konten (digeser karena sidebar 64) -->
@@ -28,7 +28,7 @@
 
     <!-- Header hanya di mobile -->
     <header class="bg-white shadow p-4 flex items-center justify-between lg:hidden">
-      <h1 class="text-lg font-semibold text-gray-800">Dashboard</h1>
+      <h1 class="text-lg font-semibold text-gray-800"></h1>
       <button id="btn-hamburger" class="text-[#bfd7ed] focus:outline-none" aria-label="Toggle navigation">
         <i class="fas fa-bars fa-lg"></i>
       </button>
@@ -63,18 +63,13 @@
 
   {% include "modal/modal_flash.html" %}
   {% include 'modal/modal_logout.html' %}
+  {% include 'modal/modalnotif.html' %}
 
 
 
   <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
   <script src="{{ url_for('static', filename='js/logoutModal.js') }}"></script> 
-  <script>
-  const socket = io();
-
-  socket.on('notifikasi_baru', function(data) {
-    alert(data.pesan);  // Atau tampilkan dengan modal/toast
-  });
-</script>
+  
   {% block script %}{% endblock %}
 </body>
 </html>

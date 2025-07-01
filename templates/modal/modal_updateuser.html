@@ -4,13 +4,21 @@
       <input type="hidden" name="id_user" id="edit_id">
 
       <label>Nama:</label>
-      <input type="text" name="nama" id="edit_nama" class="border rounded w-full mb-4">
+      <input type="text" name="nama" id="edit_nama" class="shadow bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 focus:outline-none">
 
       <label>Role:</label>
-      <input type="text" name="role" id="edit_role" class="border rounded w-full mb-4">
+      <select
+          id="edit_role"
+          name="edit_role"
+          class="shadow bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 focus:outline-none"
+          required>
+          <option disabled selected value="">-- Pilih Role --</option>
+          <option value="admin">Admin</option>
+          <option value="user">Client</option>
+      </select>
 
       <label>Status:</label>
-      <select name="status" id="edit_status" class="border rounded w-full mb-4">
+      <select name="status" id="edit_status" class="shadow bg-gray-100 rounded-full w-full py-2 px-3 text-gray-700 focus:outline-none">
         <option value="aktif">Aktif</option>
         <option value="nonaktif">Nonaktif</option>
       </select>

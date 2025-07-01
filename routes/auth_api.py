@@ -15,25 +15,37 @@ def create_auth_api(socketio):  # socketio sebagai parameter
     @api.route('/api/auth-login',methods=['POST'])
     def login():
         data = request.get_json()
-        email = data.get("email")
+        username = data.get("username")
         password = data.get("password")
-        if not email or not password:
-            return jsonify(msg="Email dan password harus diisi"), 400
+        if not username or not password:
+            return jsonify(msg="username dan password harus diisi"), 400
         try:
             with db_url.connect() as conn:
-                query = text("SELECT * FROM tb_user WHERE email = :email")
-                result = conn.execute(query, {"email": email})
-                user = result.mappings().fetchone()
+                query = text("SELECT id_user, username, password, nama, role, status FROM tb_user WHERE username = :username")
+                result = conn.execute(query, {"username": username}).fetchone()
 
-            if user and bcrypt.check_password_hash(user["password"], password):
-                token = create_access_token(identity=str(user["id_user"]))
-                return jsonify({
-                    "access_token": token,
-                    "status": "success",
-                    "message": "Login berhasil",
-                    }), 200
+            if result:
+                id_user, username, password_hash, nama, role, status = result
+                
+                if status != 'aktif':
+                    return jsonify(msg="Akun Anda tidak aktif. Silakan hubungi admin."), 403
+
+                if bcrypt.check_password_hash(password_hash, password):
+                    
+                    token = create_access_token(
+                        identity=str(id_user),
+                    )
+
+                    return jsonify(
+                        access_token=token,
+                        status="success",
+                        message="Login berhasil"
+                    ), 200
+                else:
+                    return jsonify(msg="Password salah."), 401
             else:
-                return jsonify(msg="Email atau password salah"), 401
+                return jsonify(msg="Username tidak ditemukan."), 404
+
         except Exception as e:
             return jsonify(msg=f"Terjadi kesalahan server: {str(e)}"), 500
 

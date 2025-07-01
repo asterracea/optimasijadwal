@@ -1,4 +1,4 @@
-<div id="flashModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-60 hidden">
+<div id="flashModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
     
     <div class="p-6 text-center space-y-4">
@@ -47,7 +47,7 @@
     const messages = modal.querySelectorAll('#modal-title');
     if (messages.length > 0) {
       modal.classList.remove('hidden');
-      // setTimeout(closeFlashModal, 5000); // Auto-close after 5s
+      // setTimeout(closeFlashModal, 3000); // Auto-close after 5s
     }
   });
 </script>

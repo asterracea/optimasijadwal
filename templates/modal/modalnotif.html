@@ -1,0 +1,44 @@
+<div id="socketModel" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="p-6 text-center space-y-4">
+            <!-- Icon -->
+            <div class="flex justify-center">
+              <div class="w-16 h-16 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 ">
+                <i class="text-3xl fa-solid fa-bell "></i>
+              </div>
+            </div>
+            <!-- Message -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800" id="notifPesan"></h3>
+            </div>
+    </div>
+
+    <!-- Footer Button -->
+    <div class="px-6 py-3 text-center">
+      <button onclick="closesocketModel()" class="bg-[#0074B7] text-white hover:bg-blue-700 text-sm px-4 py-2 rounded">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+const socket = io();
+socket.on('notifikasi_baru', function(data) {
+    tampilkanNotifSocket(data.pesan);
+  });
+  function closesocketModel() {
+    document.getElementById('socketModel').classList.add('hidden');
+  }
+
+  function tampilkanNotifSocket(pesan) {
+    const modal = document.getElementById('socketModel');
+    const pesanEl = document.getElementById('notifPesan');
+    
+    pesanEl.textContent = pesan;
+    modal.classList.remove('hidden');
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 5000);
+  };
+</script>

@@ -41,7 +41,7 @@ formToken.addEventListener('submit', function (e) {
     }
 
     // Ambil token dari API Node.js
-    fetch('http://192.168.1.194:8081/optimasi/login', {
+    fetch('http://192.168.1.225:8081/optimasi/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -69,7 +69,8 @@ formToken.addEventListener('submit', function (e) {
             })
             .catch(() => tampilkanModalPesan('Gagal mengirim data ke server Flask.'));
         } else {
-            tampilkanModalPesan('Gagal mendapatkan token. Cek username/password!');
+            const pesanError = data.message
+            tampilkanModalPesan(pesanError);
         }
     })
     .catch(() => tampilkanModalPesan('Gagal menghubungi server autentikasi.'));
