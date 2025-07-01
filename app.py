@@ -303,7 +303,7 @@ def data_user():
                 })
                 connection.commit()
 
-            flash("User admin berhasil ditambahkan.", "success")
+            flash("User berhasil ditambahkan.", "success")
             return redirect(url_for("data_user"))
         except Exception as e:
             flash(f"Gagal menambah user: {e}", "danger")

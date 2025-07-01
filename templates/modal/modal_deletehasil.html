@@ -1,10 +1,20 @@
-<div id="modalHapusHasil" class="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center hidden z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg text-center">
-    <h3 class="text-lg font-bold mb-4">Yakin ingin menghapus data ini?</h3>
-    <form method="POST" action="{{ url_for('delete_schedule') }}">
-      <input type="hidden" name="id_generate" id="hapus_id_generate">
+<div id="modalHapusHasil" class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"> 
+    <div class="p-6 text-center space-y-4">
+      <div class="flex justify-center">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center  bg-red-100 text-red-600">
+          <i class="text-3xl fa-solid fa-triangle-exclamation"></i>
+        </div>
+      </div>
+    <div>
+      <h3 class="text-lg font-semibold text-gray-800">Yakin ingin menghapus data ini?</h3>
+    </div>
+  </div>
+  <form method="POST" action="{{ url_for('delete_schedule') }}">
+    <input type="hidden" name="id_generate" id="hapus_id_generate">
+    <div class="px-6 py-3 text-center">
       <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700 mr-2">Ya, Hapus</button>
       <button type="button" class="bg-gray-300 px-4 py-2 rounded-full hover:bg-gray-500" onclick="tutupModal()">Batal</button>
-    </form>
-  </div>
+    </div>
+  </form>
 </div>
