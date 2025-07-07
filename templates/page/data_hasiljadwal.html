@@ -242,10 +242,10 @@
       </div>
     {% endif %}
 </div>
-
+{% include 'modal/modalsukses.html' %}
 {% include 'modal/modal_token.html' %}
 {% include 'modal/modal_deletehasil.html' %}
-{% include 'modal/modalsukses.html' %}
+
 <script src="{{ url_for('static', filename='js/modaltoken.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modalhapushasil.js') }}"></script>
 <script>

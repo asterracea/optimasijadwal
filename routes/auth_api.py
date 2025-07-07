@@ -15,7 +15,7 @@ def create_auth_api(socketio):  # socketio sebagai parameter
     api = Blueprint('auth_api', __name__)
     
     @api.route('/api/auth-login',methods=['POST'])
-    def login():
+    def auth_login():
         data = request.get_json()
         username = data.get("username")
         password = data.get("password")
@@ -73,13 +73,13 @@ def create_auth_api(socketio):  # socketio sebagai parameter
             print("Error parsing JSON:", e)
             return jsonify({"status": "failed", "error": str(e)}), 400
 
-    @api.route("/api/send-data", methods=["POST"])
+    @api.route("/send-data", methods=["POST"])
     def kirim_hasil():
         data = request.get_json()
         selected_id = data.get("id_generate")
         token = data.get("token")
         try:
-            sendApi(selected_id, token, "http://192.168.1.225:8081/optimasi/callback")
+            sendApi(selected_id, token, "http://10.248.113.173:8081/optimasi/callback")
             return jsonify({"message": "Data berhasil dikirim!", "status": "success"})
         except Exception as e:
             return jsonify({"message": f"Gagal mengirim data: {str(e)}", "status": "error"}), 500

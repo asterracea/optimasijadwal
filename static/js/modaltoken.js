@@ -41,7 +41,7 @@ formToken.addEventListener('submit', function (e) {
     }
 
     // Ambil token dari API Node.js
-    fetch('http://192.168.1.225:8081/optimasi/login', {
+    fetch('http://10.248.113.173:8081/optimasi/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -50,7 +50,7 @@ formToken.addEventListener('submit', function (e) {
     .then(data => {
         if (data.access_token) {
             // Kirim ke server Flask
-            fetch('/api/send-data', {
+            fetch('/send-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -60,19 +60,26 @@ formToken.addEventListener('submit', function (e) {
             })
             .then(res => res.json())
             .then(response => {
+                modalToken.classList.add('hidden');
                 if (response.message) {
-                    modalToken.classList.add('hidden');
                     tampilkanModalPesan(response.message);
                 } else {
                     tampilkanModalPesan('Server tidak memberikan pesan.');
                 }
             })
-            .catch(() => tampilkanModalPesan('Gagal mengirim data ke server Flask.'));
+            .catch(() => {
+                modalToken.classList.add('hidden'); 
+                tampilkanModalPesan('Gagal mengirim data ke server Flask.');
+            });
         } else {
+            modalToken.classList.add('hidden');
             const pesanError = data.message
             tampilkanModalPesan(pesanError);
         }
     })
-    .catch(() => tampilkanModalPesan('Gagal menghubungi server autentikasi.'));
+    .catch(() => {
+        modalToken.classList.add('hidden'); 
+        tampilkanModalPesan('Gagal menghubungi server autentikasi.');
+    });
 });
 

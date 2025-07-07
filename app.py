@@ -546,7 +546,7 @@ def daftar_endpoint():
 @app.route("/logout")
 def logout():
     response = redirect(url_for("login"))
-    response.delete_cookie("access_token")  # hapus token JWT dari cookie
+    response.delete_cookie("access_token")
     session.clear()
     flash("Anda telah logout.", "info")
     return response
