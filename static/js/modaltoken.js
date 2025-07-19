@@ -41,7 +41,7 @@ formToken.addEventListener('submit', function (e) {
     }
 
     // Ambil token dari API Node.js
-    fetch('http://10.248.113.173:8081/optimasi/login', {
+    fetch('http://192.168.195.173:8081/optimasi/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

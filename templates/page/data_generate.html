@@ -30,7 +30,7 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                     {% if generates|length > 0 %}
                         {% for item in generates %}
-                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <tr class="hover:bg-blue-100 transition-all group duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ loop.index }}
                                 </td>
@@ -71,7 +71,7 @@
                                     </div>
                                 </td>
                                 
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm group-hover:bg-blue-100 transition-colors">
                                     <button
                                             class="text-red-500 hover:text-red-700"
                                             title="Hapus"

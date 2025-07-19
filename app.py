@@ -23,9 +23,9 @@ app.secret_key = "kyutpipel"
 app.config["JWT_SECRET_KEY"] = "semhaslancar"
 app.config["JWT_TOKEN_LOCATION"] = ["cookies","headers"]
 app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
-app.config["JWT_COOKIE_CSRF_PROTECT"] = False #sementara
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False 
 app.config["JWT_HEADER_TYPE"] = "Bearer"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
@@ -156,7 +156,7 @@ def generate_jadwal():
         jadwal_list = df_jadwal.to_dict(orient='records')
         sa.simpan_optimasi(df_jadwal)
 
-        # flash('Jadwal berhasil digenerate!', 'success')
+        flash('Jadwal berhasil digenerate!', 'success')
         return render_template('page/dashboard.html', data=jadwal_list, nama_user=nama_user,role_user=role_user)
     return redirect(url_for('dashboard'))
    

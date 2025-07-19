@@ -10,22 +10,22 @@ import pandas as pd
 from config import db_url
 
 class Ruang:
-    def __init__(self, nama, tipe_ruang):
+    def __init__(self, nama, tipe_ruang): #membuat objek dari kelas, inisialisasi nilai awal dari atribut objek
         self.nama = nama
         self.tipe_ruang = tipe_ruang
         self.jadwal = defaultdict(lambda: defaultdict(lambda: None))
     
-    def __repr__(self):
+    def __repr__(self): #untuk cetak string tanpa keteranagn main
         return f"Ruang(nama={self.nama}, tipe_ruang={self.tipe_ruang})"
 class Dosen:
-    def __init__(self, nama):
+    def __init__(self, nama): #membuat objek dari kelas, inisialisasi nilai awal dari atribut objek
         self.nama = nama
         self.jadwal = defaultdict(lambda: defaultdict(lambda: None))
     def __repr__(self):
         return f"Dosen(nama={self.nama})"
 
 class Matakuliah:
-    def __init__(self, matkul, dosen, sks, kelas, id_perkuliahan, id_semester, semester,kategori,prodi,valid_lab=None,status = None): #tambah id_perkuliahan
+    def __init__(self, matkul, dosen, sks, kelas, id_perkuliahan, id_semester, semester,kategori,prodi,status = None): #tambah id_perkuliahan
         self.id_perkuliahan = id_perkuliahan
         self.matkul = matkul
         self.dosen = dosen
@@ -36,7 +36,6 @@ class Matakuliah:
         self.semester = semester
         self.kategori = kategori
         self.prodi=prodi
-        self.valid_lab = valid_lab if valid_lab else []
         self.butuh_tipe = self.set_ruang(kategori,status)
 
     def __repr__(self):
@@ -53,7 +52,7 @@ class Matakuliah:
             return []
         
 class PenjadwalanSA:
-    def __init__(self, initial_temperature, cooling_rate, max_iterations, id_generate):
+    def __init__(self, initial_temperature, cooling_rate, max_iterations, id_generate): #membuat objek dari kelas, inisialisasi nilai awal dari atribut objek
         self.initial_temperature = initial_temperature
         self.cooling_rate = cooling_rate
         self.max_iterations = max_iterations
@@ -79,11 +78,7 @@ class PenjadwalanSA:
         ]
         self.daftar_slot = self.generate_slot_waktu()
         self.prodi_jadwal = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None))))
-        
-        self.harus_lab = {
-                "Jaringan Komputer": ["Lab 216"],
-                "Praktik Jaringan Komputer": ["Lab 216"],
-            }
+
         self.baca_datamk()
         self.baca_dataruang()
 
@@ -120,11 +115,10 @@ class PenjadwalanSA:
         # Iterasi per baris untuk menambahkan data
         for row in df_matkul.itertuples(index=False):
             dosen_obj = self.tambah_dosen(row.dosen)
-            valid_lab = self.harus_lab.get(row.matakuliah, [])
 
             self.tambah_matkul(
                     row.matakuliah, dosen_obj, row.sks, row.kelas, row.status,
-                    row.id_perkuliahan, row.id_semester, row.semester, row.kategori, row.prodi, valid_lab
+                    row.id_perkuliahan, row.id_semester, row.semester, row.kategori, row.prodi
                 )
     def baca_datadosen(self):
         query = text("""
@@ -170,8 +164,8 @@ class PenjadwalanSA:
         self.daftar_ruang.append(ruang)
         return ruang
     
-    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,kategori,prodi,valid_lab):
-        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester,semester,kategori,prodi,valid_lab,status) #tambahkan id_perkuliahan
+    def tambah_matkul(self,matkul, dosen, sks, kelas, status,id_perkuliahan,id_semester,semester,kategori,prodi):
+        matkul = Matakuliah(matkul, dosen, sks, kelas, id_perkuliahan, id_semester,semester,kategori,prodi,status) #tambahkan id_perkuliahan
         self.daftar_matkul.append(matkul)
         return matkul
 
@@ -220,12 +214,6 @@ class PenjadwalanSA:
                 if ruang.nama == "Lab 216":
                     return ruang
 
-        if matkul.valid_lab:
-            ruang_valid = [ruang for ruang in self.daftar_ruang if ruang.nama in matkul.valid_lab]
-            if ruang_valid:
-                return random.choice(ruang_valid)
-
-        # Default, pilih sesuai kebutuhan ruang
         ruang_valid = [ruang for ruang in self.daftar_ruang if not matkul.butuh_tipe or any(tipe in ruang.tipe_ruang for tipe in matkul.butuh_tipe)]
         
         return random.choice(ruang_valid) if ruang_valid else random.choice(self.daftar_ruang)
@@ -288,6 +276,7 @@ class PenjadwalanSA:
         for i, (mk1, r1, h1, j1) in enumerate(solusi):
             durasi1 = self.jam_sks(mk1.sks,mk1.kategori)
             if mk1.butuh_tipe and not any(tipe in r1.tipe_ruang for tipe in mk1.butuh_tipe):
+                print(f"[!] MK {mk1.matkul} butuh {mk1.butuh_tipe}, tapi ditempatkan di {r1.nama} ({r1.tipe_ruang})")
                 score += 10  
             for mk2, r2, h2, j2 in solusi[i+1:]:
                 durasi2 = self.jam_sks(mk2.sks,mk2.kategori)
@@ -299,11 +288,6 @@ class PenjadwalanSA:
                     if mk1.prodi == mk2.prodi and mk1.semester == mk2.semester and max(j1, j2) < min(j1 + durasi1, j2 + durasi2):
                         score += 1
         return score
-    
-    def accept_probability(self, current_score, neighbor_score, temperature):
-        if neighbor_score < current_score:
-            return 1.0
-        return math.exp((current_score - neighbor_score) / temperature)
     
     def apply_solution(self, solusi):
         self.reset_jadwal()

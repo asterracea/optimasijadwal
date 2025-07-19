@@ -46,7 +46,7 @@ def create_auth_api(socketio):  # socketio sebagai parameter
                 else:
                     return jsonify(msg="Password salah."), 401
             else:
-                return jsonify(msg="Username tidak ditemukan."), 404
+                return jsonify(msg="Username tidak ditemukan."), 401
 
         except Exception as e:
             return jsonify(msg=f"Terjadi kesalahan server: {str(e)}"), 500
@@ -79,7 +79,7 @@ def create_auth_api(socketio):  # socketio sebagai parameter
         selected_id = data.get("id_generate")
         token = data.get("token")
         try:
-            sendApi(selected_id, token, "http://10.248.113.173:8081/optimasi/callback")
+            sendApi(selected_id, token, "http://192.168.195.173:8081/optimasi/callback")
             return jsonify({"message": "Data berhasil dikirim!", "status": "success"})
         except Exception as e:
             return jsonify({"message": f"Gagal mengirim data: {str(e)}", "status": "error"}), 500

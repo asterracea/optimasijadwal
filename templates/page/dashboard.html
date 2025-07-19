@@ -48,7 +48,7 @@
           <!-- Alpha Parameter -->
           <div class="space-y-2">
             <label for="alpha" class="block text-sm font-medium text-gray-700">
-              Laju pendinginan <span class="text-red-500">*</span>
+              Kecepatan penyesuaian solusi<span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -58,7 +58,7 @@
                       step="0.00001"
                       min="0.1"
                       max="0.99999"
-                      placeholder="0.95"
+                      placeholder=""
                       required>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <i class="fas fa-percentage text-gray-400 text-sm"></i>
@@ -72,7 +72,7 @@
           <!-- suhu -->
           <div class="space-y-2">
             <label for="suhuawal" class="block text-sm font-medium text-gray-700">
-              Suhu Awal <span class="text-red-500">*</span>
+              Besar eksplorasi awal<span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -80,7 +80,7 @@
                       id="suhuawal" 
                       name="suhuawal" 
                       min="1"
-                      placeholder="500"
+                      placeholder=""
                       required>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <i class="fas fa-thermometer-half text-gray-400 text-sm"></i>
@@ -88,14 +88,14 @@
             </div>
             <div class="bg-orange-50 p-2 rounded text-xs text-orange-700">
               <i class="fas fa-info-circle mr-1"></i>
-              Nilai positif<br>
+              Nilai positif dari 500-20000 <br>
             </div>
           </div>
 
           <!-- maxt -->
           <div class="space-y-2">
             <label for="maxt" class="block text-sm font-medium text-gray-700">
-              Max Iterasi <span class="text-red-500">*</span>
+              Total Percobaan <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input class="w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -103,7 +103,7 @@
                       id="maxt" 
                       name="maxt" 
                       min="1"
-                      placeholder="5000"
+                      placeholder=""
                       required>
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <i class="fas fa-redo text-gray-400 text-sm"></i>
@@ -111,7 +111,7 @@
             </div>
             <div class="bg-purple-50 p-2 rounded text-xs text-purple-700">
               <i class="fas fa-info-circle mr-1"></i>
-              Bilangan bulat positif<br>
+              Bilangan bulat positif mulai 1000<br>
             </div>
           </div>
         </div>
